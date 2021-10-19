@@ -62,7 +62,10 @@ namespace CMS.Data.Migrations
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -175,6 +178,39 @@ namespace CMS.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Lawyers",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    AadharNumber = table.Column<long>(type: "bigint", nullable: false),
+                    PanCardNumber = table.Column<long>(type: "bigint", nullable: false),
+                    VotingId = table.Column<long>(type: "bigint", nullable: false),
+                    Lawyer_uniqueNumber = table.Column<long>(type: "bigint", nullable: false),
+                    SpecializationId = table.Column<long>(type: "bigint", nullable: false),
+                    Specialization = table.Column<int>(type: "int", nullable: false),
+                    CaseId = table.Column<long>(type: "bigint", nullable: false),
+                    AppointmentId = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Lawyers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Lawyers_UserData_UserId",
+                        column: x => x.UserId,
+                        principalTable: "UserData",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -213,6 +249,17 @@ namespace CMS.Data.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Lawyers_Lawyer_uniqueNumber",
+                table: "Lawyers",
+                column: "Lawyer_uniqueNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Lawyers_UserId",
+                table: "Lawyers",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -233,13 +280,16 @@ namespace CMS.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "UserData");
+                name: "Lawyers");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "UserData");
         }
     }
 }

@@ -8,10 +8,8 @@ using System.Threading.Tasks;
 
 namespace CMS.Services.Interface
 {
-    public interface IUserService
+    public interface ILawyerService
     {
-        User GetUserDetails(LoginFM loginUser);
-        IList<string> GetUserRole(User user);
-        UserFM CreateOrUpdateUser(UserFM userFM);
+        LawyerFM CreateOrUpdateLawyer(LawyerFM lawyer);
     }
 }

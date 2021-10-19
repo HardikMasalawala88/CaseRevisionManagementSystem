@@ -17,8 +17,11 @@ namespace CMS.Data.ContextModels
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Lawyer>(entity => entity.HasIndex(e => e.Lawyer_uniqueNumber).IsUnique());
         }
         public DbSet<User> UserData { get; set; }
+        public DbSet<Lawyer> Lawyers { get; set; }
         public DbSet<ApplicationUser> ApplicationUser { get; set; }
     }
 }
