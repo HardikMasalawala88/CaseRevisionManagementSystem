@@ -1,0 +1,51 @@
+﻿using CMS.Data.ContextModels;
+using CMS.Repository.Interface;
+using CMS.Repository.Repository;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CMS.Repository
+{
+    public class CaseRepository : ICaseRepository
+    {
+        private readonly IRepository<Case> _caseRepository;
+        public CaseRepository(IRepository<Case> caseRepository)
+        {
+            _caseRepository = caseRepository;
+        }
+
+        public void DeleteCase(long id)
+        {
+            Case caseInfo = GetCase(id);
+            caseInfo.IsDelete = true;
+            caseInfo.ModifiedDate = DateTime.UtcNow;
+            caseInfo.ModifiedBy = caseInfo.CreatedBy;
+
+            _caseRepository.SaveChanges();
+        }
+
+        public Case GetCase(long id)
+        {
+            return _caseRepository.GetById(id);
+        }
+
+        public IEnumerable<Case> GetCases()
+        {
+            return _caseRepository.GetAll();
+        }
+
+        public Case InsertCase(Case caseData)
+        {
+            Case caseDetail = _caseRepository.Insert(caseData);
+            return caseDetail;
+        }
+
+        public void UpdateCase(Case caseData)
+        {
+            _caseRepository.Update(caseData);
+        }
+    }
+}

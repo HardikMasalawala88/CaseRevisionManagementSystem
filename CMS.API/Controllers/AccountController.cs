@@ -82,6 +82,10 @@ namespace CMS.API.Controllers
             {
                 await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.User));
             }
+            if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.Lawyer))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.Lawyer));
+            }
 
             //Add role to user
             if (!string.IsNullOrEmpty(registerModel.Role) && registerModel.Role == ApplicationUserRoles.Admin)
@@ -91,6 +95,10 @@ namespace CMS.API.Controllers
             else if (!string.IsNullOrEmpty(registerModel.Role) && registerModel.Role == ApplicationUserRoles.SuperAdmin)
             {
                 await _userManager.AddToRoleAsync(user, ApplicationUserRoles.SuperAdmin);
+            }
+            else if (!string.IsNullOrEmpty(registerModel.Role) && registerModel.Role == ApplicationUserRoles.Lawyer)
+            {
+                await _userManager.AddToRoleAsync(user, ApplicationUserRoles.Lawyer);
             }
             else
             {
@@ -109,12 +117,13 @@ namespace CMS.API.Controllers
             {
                 IList<string> userRole = await _userManager.GetRolesAsync(user);
                 string token = _jWTTokenGenerator.GenerateLoginToken(user.UserName, userRole);
-
+                HttpContext.Session.SetString("UserId", user.Id);
                 return Ok(token);
             }
             var userData = _userService.GetUserDetails(loginUser);
             if (userData != null)
             {
+                HttpContext.Session.SetString("UserId", userData.Id.ToString());
                 IList<string> userRole = _userService.GetUserRole(userData);
                 string token = _jWTTokenGenerator.GenerateLoginToken(userData.Username, userRole);
                 return Ok(token);

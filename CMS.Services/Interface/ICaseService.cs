@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace CMS.Services.Interface
 {
-    public interface IUserService
+    public interface ICaseService
     {
-        User GetUserDetails(LoginFM loginUser);
-        IList<string> GetUserRole(User user);
-        UserFM CreateOrUpdateUser(UserFM userFM);
+        CaseFM CreateOrUpdateCase(CaseFM caseFM);
+        IEnumerable<Case> ListCaseDetail();
+        bool RemoveCaseDetail(long caseId);
     }
 }

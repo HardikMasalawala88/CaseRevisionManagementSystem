@@ -41,9 +41,16 @@ namespace CMS.API
 
             services.AddControllers();
             services.AddMvc();
+            services.AddSession();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddTransient<IUserService, UserService>();
+            services.AddTransient<ILawyerService, LawyerService>();
+            services.AddTransient<IClientService, ClientService>();
+            services.AddTransient<ICaseService, CaseService>();
             services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<ILawyerRepository, LawyerRepository>();
+            services.AddTransient<IClientRepository, ClientRepository>();
+            services.AddTransient<ICaseRepository, CaseRepository>();
             services.AddDbContext<ApplicationContext>(item => item.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.IntegrateSwagger();
             //For Identity
@@ -89,6 +96,8 @@ namespace CMS.API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseSession();
 
             app.UseAuthentication();
 

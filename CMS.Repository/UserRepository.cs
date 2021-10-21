@@ -19,7 +19,10 @@ namespace CMS.Repository
         public void DeleteUser(long id)
         {
             User user = GetUser(id);
-            _userRepository.Remove(user);
+            user.IsDelete = true;
+            user.ModifiedDate = DateTime.UtcNow;
+            user.ModifiedBy = user.CreatedBy;
+            //_userRepository.Remove(user);
             _userRepository.SaveChanges();
         }
 
