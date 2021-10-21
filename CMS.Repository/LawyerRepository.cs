@@ -19,7 +19,11 @@ namespace CMS.Repository
         public void DeleteLawyer(long id)
         {
             Lawyer lawyer = GetLawyer(id);
-            _lawyerRepository.Remove(lawyer);
+            lawyer.IsDelete = true;
+            lawyer.ModifiedDate = DateTime.UtcNow;
+            lawyer.ModifiedBy = lawyer.CreatedBy;
+
+           // _lawyerRepository.Remove(lawyer);
             _lawyerRepository.SaveChanges();
         }
 

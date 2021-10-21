@@ -11,5 +11,8 @@ namespace CMS.Services.Interface
     public interface ILawyerService
     {
         LawyerFM CreateOrUpdateLawyer(LawyerFM lawyer);
+        IEnumerable<Lawyer> ListLawyerData();
+        Lawyer GetLawyerData(long lawyerId);
+        bool RemoveLawyerData(long lawyerId);
     }
 }

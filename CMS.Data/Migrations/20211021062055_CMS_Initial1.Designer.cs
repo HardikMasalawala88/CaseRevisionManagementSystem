@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CMS.Data.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20211019134323_Initial1")]
-    partial class Initial1
+    [Migration("20211021062055_CMS_Initial1")]
+    partial class CMS_Initial1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -86,6 +86,102 @@ namespace CMS.Data.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("CMS.Data.ContextModels.Case", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CaseDetail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("CaseParentId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ClientId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CourtLocation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("HearingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("LawyerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("LawyerId");
+
+                    b.ToTable("Cases");
+                });
+
+            modelBuilder.Entity("CMS.Data.ContextModels.Client", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("AadharNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("PanCardNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("State")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("VotingId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Clients");
+                });
+
             modelBuilder.Entity("CMS.Data.ContextModels.Lawyer", b =>
                 {
                     b.Property<long>("Id")
@@ -126,11 +222,8 @@ namespace CMS.Data.Migrations
                     b.Property<long>("PanCardNumber")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("Specialization")
-                        .HasColumnType("int");
-
-                    b.Property<long>("SpecializationId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("Specialization")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
@@ -333,6 +426,36 @@ namespace CMS.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("CMS.Data.ContextModels.Case", b =>
+                {
+                    b.HasOne("CMS.Data.ContextModels.Client", "Client")
+                        .WithMany("Cases")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CMS.Data.ContextModels.Lawyer", "Lawyer")
+                        .WithMany("Cases")
+                        .HasForeignKey("LawyerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+
+                    b.Navigation("Lawyer");
+                });
+
+            modelBuilder.Entity("CMS.Data.ContextModels.Client", b =>
+                {
+                    b.HasOne("CMS.Data.ContextModels.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CMS.Data.ContextModels.Lawyer", b =>
                 {
                     b.HasOne("CMS.Data.ContextModels.User", "User")
@@ -393,6 +516,16 @@ namespace CMS.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("CMS.Data.ContextModels.Client", b =>
+                {
+                    b.Navigation("Cases");
+                });
+
+            modelBuilder.Entity("CMS.Data.ContextModels.Lawyer", b =>
+                {
+                    b.Navigation("Cases");
                 });
 #pragma warning restore 612, 618
         }

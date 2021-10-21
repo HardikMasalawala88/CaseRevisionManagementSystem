@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace CMS.Data.Migrations
 {
-    public partial class Initial1 : Migration
+    public partial class CMS_Initial1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -179,6 +179,35 @@ namespace CMS.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Clients",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    State = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    AadharNumber = table.Column<long>(type: "bigint", nullable: false),
+                    PanCardNumber = table.Column<long>(type: "bigint", nullable: false),
+                    VotingId = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Clients", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Clients_UserData_UserId",
+                        column: x => x.UserId,
+                        principalTable: "UserData",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Lawyers",
                 columns: table => new
                 {
@@ -190,10 +219,9 @@ namespace CMS.Data.Migrations
                     PanCardNumber = table.Column<long>(type: "bigint", nullable: false),
                     VotingId = table.Column<long>(type: "bigint", nullable: false),
                     Lawyer_uniqueNumber = table.Column<long>(type: "bigint", nullable: false),
-                    SpecializationId = table.Column<long>(type: "bigint", nullable: false),
-                    Specialization = table.Column<int>(type: "int", nullable: false),
-                    CaseId = table.Column<long>(type: "bigint", nullable: false),
+                    Specialization = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AppointmentId = table.Column<long>(type: "bigint", nullable: false),
+                    CaseId = table.Column<long>(type: "bigint", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -209,6 +237,41 @@ namespace CMS.Data.Migrations
                         principalTable: "UserData",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Cases",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ClientId = table.Column<long>(type: "bigint", nullable: false),
+                    LawyerId = table.Column<long>(type: "bigint", nullable: false),
+                    CaseDetail = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    HearingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CourtLocation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CaseParentId = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Cases", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Cases_Clients_ClientId",
+                        column: x => x.ClientId,
+                        principalTable: "Clients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Cases_Lawyers_LawyerId",
+                        column: x => x.LawyerId,
+                        principalTable: "Lawyers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -251,6 +314,21 @@ namespace CMS.Data.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Cases_ClientId",
+                table: "Cases",
+                column: "ClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Cases_LawyerId",
+                table: "Cases",
+                column: "LawyerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Clients_UserId",
+                table: "Clients",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Lawyers_Lawyer_uniqueNumber",
                 table: "Lawyers",
                 column: "Lawyer_uniqueNumber",
@@ -280,13 +358,19 @@ namespace CMS.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Lawyers");
+                name: "Cases");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Clients");
+
+            migrationBuilder.DropTable(
+                name: "Lawyers");
 
             migrationBuilder.DropTable(
                 name: "UserData");

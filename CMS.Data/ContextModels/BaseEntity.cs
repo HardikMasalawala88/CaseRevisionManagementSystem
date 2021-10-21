@@ -17,6 +17,6 @@ namespace CMS.Data.ContextModels
         public string CreatedBy { get; set; }
         public DateTime? ModifiedDate { get; set; }
         public string ModifiedBy { get; set; }
-        public bool IsDelete { get; set; }
+        public bool IsDelete { get; set; } = false;
     }
 }

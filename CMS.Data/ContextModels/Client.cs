@@ -6,22 +6,19 @@ using System.Threading.Tasks;
 
 namespace CMS.Data.ContextModels
 {
-    public class Lawyer : BaseEntity
+    public class Client : BaseEntity
     {
-        public Lawyer()
+        public Client()
         {
             this.Cases = new HashSet<Case>();
         }
         public long UserId { get; set; }
         public virtual User User { get; set; }
+        public string State { get; set; }
         public DateTime? DateOfBirth { get; set; } = DateTime.UtcNow;
         public long AadharNumber { get; set; }
         public long PanCardNumber { get; set; }
         public long VotingId { get; set; }
-        public long Lawyer_uniqueNumber { get; set; }
-        public string Specialization { get; set; }
-        public long AppointmentId { get; set; }
-        public long CaseId { get; set; }
         public virtual ICollection<Case> Cases { get; set; }
     }
 }

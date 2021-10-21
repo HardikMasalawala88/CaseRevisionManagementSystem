@@ -28,7 +28,6 @@ namespace CMS.Services
             try
             {
                 var lawyerDetail = _context.Lawyers.Where(x => x.Id == lawyerFM.Id).FirstOrDefault();
-                //var userDetail = _context.UserData.Where(x => x.Id == userId).FirstOrDefault();
                 if (lawyerDetail != null)
                 {
                     User user = new User();
@@ -38,11 +37,12 @@ namespace CMS.Services
                     user.Address = lawyerFM.User.Address;
                     user.City = lawyerFM.User.City;
                     user.Gender = lawyerFM.User.Gender;
-                    user.ModifiedBy = lawyerFM.User.Name;
                     user.Role = lawyerFM.User.Role;
                     user.Username = lawyerFM.User.Username;
+                    user.ModifiedBy = lawyerFM.User.ModifiedBy;
                     user.Password = lawyerFM.User.Password;
                     user.ModifiedDate = DateTime.UtcNow;
+
                     _userRepository.UpdateUser(user);
 
                     Lawyer lawyer = new Lawyer();
@@ -53,11 +53,11 @@ namespace CMS.Services
                     lawyer.PanCardNumber = lawyerDetail.PanCardNumber;
                     lawyer.Lawyer_uniqueNumber = lawyerDetail.Lawyer_uniqueNumber;
                     lawyer.VotingId = lawyerDetail.VotingId;
-                    lawyer.SpecializationId = lawyerDetail.SpecializationId;
+                    lawyer.Specialization = lawyerDetail.Specialization; 
                     lawyer.CaseId = lawyerDetail.CaseId;
                     lawyer.AppointmentId = lawyerDetail.AppointmentId;
                     lawyer.ModifiedDate = DateTime.UtcNow;
-                    lawyer.ModifiedBy = user.Name;
+                    lawyer.ModifiedBy = user.ModifiedBy;
 
                     _lawyerRepository.UpdateLawyer(lawyer);
                 }
@@ -70,11 +70,10 @@ namespace CMS.Services
                     user.Address = lawyerFM.User.Address;
                     user.City = lawyerFM.User.City;
                     user.Gender = lawyerFM.User.Gender;
-                    user.ModifiedBy = lawyerFM.User.Name;
                     user.Role = lawyerFM.User.Role;
                     user.Username = lawyerFM.User.Username;
                     user.Password = lawyerFM.User.Password;
-                    user.ModifiedDate = DateTime.UtcNow;
+                    user.CreatedBy = lawyerFM.User.CreatedBy;
                     _userRepository.InsertUser(user);
 
                     Lawyer lawyer = new Lawyer();
@@ -84,13 +83,14 @@ namespace CMS.Services
                     lawyer.PanCardNumber = lawyerFM.PanCardNumber;
                     lawyer.Lawyer_uniqueNumber = lawyerFM.Lawyer_uniqueNumber;
                     lawyer.VotingId = lawyerFM.VotingId;
-                    lawyer.SpecializationId = lawyerFM.SpecializationId;
+                    lawyer.Specialization = lawyerFM.Specialization.ToString(); 
                     lawyer.CaseId = lawyerFM.CaseId;
                     lawyer.AppointmentId = lawyerFM.AppointmentId;
-                    lawyer.CreatedBy = user.Name;
+                    lawyer.CreatedBy = user.CreatedBy;
                     
                     _lawyerRepository.InsertLawyer(lawyer);
                     lawyerFM.Id = lawyer.Id;
+                    lawyerFM.UserId = lawyer.User.Id;
                 }
             }
             catch (Exception ex)
@@ -98,6 +98,38 @@ namespace CMS.Services
 
             }
             return lawyerFM;
+        }
+
+        public IEnumerable<Lawyer> ListLawyerData()
+        {
+            var lawyerInfo = _lawyerRepository.GetLawyers().Where(x => x.IsDelete != true).ToList();
+          
+            return lawyerInfo;
+        }
+
+        public Lawyer GetLawyerData(long lawyerId)
+        {
+            var lawyerDetail = _lawyerRepository.GetLawyer(lawyerId);
+
+            return lawyerDetail;
+        }
+
+        public bool RemoveLawyerData(long lawyerId)
+        {
+            var lawyerData = _lawyerRepository.GetLawyer(lawyerId);
+            lawyerData.User = _userRepository.GetUser(lawyerData.UserId);
+            if (lawyerData != null)
+            {
+                _lawyerRepository.DeleteLawyer(lawyerId);
+
+                _userRepository.DeleteUser(lawyerData.User.Id);
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
