@@ -9,6 +9,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\CMS.API\CMS.API.csproj" />
+    <ProjectReference Include="..\..\CMS.Data\CMS.Data.csproj" />
+    <ProjectReference Include="..\..\CMS.Services\CMS.Services.csproj" />
     <ProjectReference Include="..\Client\CMS.UI.Client.csproj" />
     <ProjectReference Include="..\Shared\CMS.UI.Shared.csproj" />
   </ItemGroup>

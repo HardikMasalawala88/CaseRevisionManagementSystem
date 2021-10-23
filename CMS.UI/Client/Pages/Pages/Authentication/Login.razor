@@ -1,15 +1,16 @@
 ﻿@page "/"
 @page "/pages/authentication/login"
 @layout LoginLayout
-
+@inject HttpClient Http
+@using CMS.UI.Shared
 
 
 
 <MudText Typo="Typo.h4" GutterBottom="true">Sign In</MudText>
 
 <MudText>Don't have an account? <MudLink Href="/pages/authentication/register">Sign Up</MudLink></MudText>
-
-<MudTextField T="string" Value="@("staff@mudblazor.com")" Label="E-mail" Variant="Variant.Outlined" Class="my-6"></MudTextField>
+@*Value="@("staff@mudblazor.com")"*@
+<MudTextField T="string" @bind-Value="@Username" Label="E-mail" Variant="Variant.Outlined" Class="my-6"></MudTextField>
 
 <MudTextField @bind-Value="@Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="TogglePasswordVisibility" />
 
@@ -19,10 +20,11 @@
 </div>
 
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" Link="/personal/dashboard" Size="Size.Large" FullWidth="true">Sign In</MudButton>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" Link="/personal/dashboard" @onclick="OnLogin" Size="Size.Large" FullWidth="true">Sign In</MudButton>
 
 @code {
-    string Password { get; set; } = "BMWvBPJXZu";
+    string Username { get; set; } = "";
+    string Password { get; set; } = "";
 
     bool PasswordVisibility;
     InputType PasswordInput = InputType.Password;
@@ -43,4 +45,16 @@
             PasswordInput = InputType.Text;
         }
     }
+
+    private WeatherForecast[] forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+    }
+    protected void OnLogin()
+    {
+        Console.Write(Username, Password);
+    }
+
 }
