@@ -18,10 +18,6 @@ namespace CMS.API.Utilities
             {
                 var context = serviceScope.ServiceProvider.GetService<ApplicationContext>();
 
-                context.Database.Migrate();
-
-                string[] roles = new string[] { "SuperAdmin", "Admin", "Lawyer", "Client" };
-
                 var user = new ApplicationUser
                 {
                     Id = Guid.NewGuid().ToString(),
@@ -54,6 +50,8 @@ namespace CMS.API.Utilities
                 }
                 context.SaveChangesAsync();
 
+                string[] roles = new string[] { "SuperAdmin", "Admin", "Lawyer", "Client" };
+
                 foreach (string role in roles)
                 {
                     var roleStore = new RoleStore<IdentityRole>(context);
@@ -67,6 +65,8 @@ namespace CMS.API.Utilities
                 var res = AssignRoles(serviceProvider, user.Email, roles);
 
                 context.SaveChangesAsync();
+
+                //context.Database.Migrate();
             }
         }
 
