@@ -13,10 +13,10 @@ namespace CMS.Services
     public class LawyerService : ILawyerService
     {
         private readonly ILawyerRepository _lawyerRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IAppUserRepository _userRepository;
         private readonly ApplicationContext _context;
 
-        public LawyerService(ILawyerRepository lawyerRepository, ApplicationContext context, IUserRepository userRepository)
+        public LawyerService(ILawyerRepository lawyerRepository, ApplicationContext context, IAppUserRepository userRepository)
         {
             _lawyerRepository = lawyerRepository;
             _userRepository = userRepository;
@@ -30,17 +30,17 @@ namespace CMS.Services
                 var lawyerDetail = _context.Lawyers.Where(x => x.Id == lawyerFM.Id).FirstOrDefault();
                 if (lawyerDetail != null)
                 {
-                    User user = new User();
-                    user.Name = lawyerFM.User.Name;
-                    user.EmailId = lawyerFM.User.EmailId;
-                    user.MobileNo = lawyerFM.User.MobileNo;
-                    user.Address = lawyerFM.User.Address;
-                    user.City = lawyerFM.User.City;
-                    user.Gender = lawyerFM.User.Gender;
-                    user.Role = lawyerFM.User.Role;
-                    user.Username = lawyerFM.User.Username;
-                    user.ModifiedBy = lawyerFM.User.ModifiedBy;
-                    user.Password = lawyerFM.User.Password;
+                    ApplicationUser user = new ApplicationUser();
+                    user.Name = lawyerFM.ApplicationUser.Name;
+                    user.Email = lawyerFM.ApplicationUser.Email;
+                    user.PhoneNumber = lawyerFM.ApplicationUser.PhoneNumber;
+                    user.Address = lawyerFM.ApplicationUser.Address;
+                    user.City = lawyerFM.ApplicationUser.City;
+                    user.Gender = lawyerFM.ApplicationUser.Gender;
+                    user.Role = lawyerFM.ApplicationUser.Role;
+                    user.UserName = lawyerFM.ApplicationUser.UserName;
+                    user.ModifiedBy = lawyerFM.ApplicationUser.ModifiedBy;
+                    user.PasswordHash = lawyerFM.ApplicationUser.PasswordHash;
                     user.ModifiedDate = DateTime.UtcNow;
 
                     _userRepository.UpdateUser(user);
@@ -63,17 +63,17 @@ namespace CMS.Services
                 }
                 else
                 {
-                    User user = new User();
-                    user.Name = lawyerFM.User.Name;
-                    user.EmailId = lawyerFM.User.EmailId;
-                    user.MobileNo = lawyerFM.User.MobileNo;
-                    user.Address = lawyerFM.User.Address;
-                    user.City = lawyerFM.User.City;
-                    user.Gender = lawyerFM.User.Gender;
-                    user.Role = lawyerFM.User.Role;
-                    user.Username = lawyerFM.User.Username;
-                    user.Password = lawyerFM.User.Password;
-                    user.CreatedBy = lawyerFM.User.CreatedBy;
+                    ApplicationUser user = new ApplicationUser();
+                    user.Name = lawyerFM.ApplicationUser.Name;
+                    user.Email = lawyerFM.ApplicationUser.Email;
+                    user.PhoneNumber = lawyerFM.ApplicationUser.PhoneNumber;
+                    user.Address = lawyerFM.ApplicationUser.Address;
+                    user.City = lawyerFM.ApplicationUser.City;
+                    user.Gender = lawyerFM.ApplicationUser.Gender;
+                    user.Role = lawyerFM.ApplicationUser.Role;
+                    user.UserName = lawyerFM.ApplicationUser.UserName;
+                    user.PasswordHash = lawyerFM.ApplicationUser.PasswordHash;
+                    user.CreatedBy = lawyerFM.ApplicationUser.CreatedBy;
                     _userRepository.InsertUser(user);
 
                     Lawyer lawyer = new Lawyer();
@@ -90,7 +90,7 @@ namespace CMS.Services
                     
                     _lawyerRepository.InsertLawyer(lawyer);
                     lawyerFM.Id = lawyer.Id;
-                    lawyerFM.UserId = lawyer.User.Id;
+                    lawyerFM.UserId = lawyer.ApplicationUser.Id;
                 }
             }
             catch (Exception ex)
@@ -117,12 +117,12 @@ namespace CMS.Services
         public bool RemoveLawyerData(long lawyerId)
         {
             var lawyerData = _lawyerRepository.GetLawyer(lawyerId);
-            lawyerData.User = _userRepository.GetUser(lawyerData.UserId);
+            lawyerData.ApplicationUser = _userRepository.GetUser(lawyerData.UserId);
             if (lawyerData != null)
             {
                 _lawyerRepository.DeleteLawyer(lawyerId);
 
-                _userRepository.DeleteUser(lawyerData.User.Id);
+                _userRepository.DeleteUser(lawyerData.ApplicationUser.Id);
 
                 return true;
             }

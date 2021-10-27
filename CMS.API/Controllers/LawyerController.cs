@@ -15,7 +15,7 @@ namespace CMS.API.Controllers
 {
     [Authorize(Roles = ApplicationUserRoles.Lawyer)]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class LawyerController : Controller
     {
         private readonly ILogger<LawyerController> _logger;
@@ -41,7 +41,7 @@ namespace CMS.API.Controllers
         public IActionResult AddClient(ClientFM clientFM)
         {
             var loggedInUser = HttpContext.Session.GetString("UserId");
-            clientFM.User.CreatedBy = loggedInUser;
+            clientFM.ApplicationUser.CreatedBy = loggedInUser;
             var clientData = _clientService.CreateOrUpdateClient(clientFM);
             if (clientData != null)
             {
@@ -62,7 +62,7 @@ namespace CMS.API.Controllers
         public IActionResult UpdateClient(ClientFM clientForm)
         {
             var loggedInUser = HttpContext.Session.GetString("UserId");
-            clientForm.User.ModifiedBy = loggedInUser;
+            clientForm.ApplicationUser.ModifiedBy = loggedInUser;
             var clientUpdatedData = _clientService.CreateOrUpdateClient(clientForm);
             if (clientUpdatedData != null)
             {

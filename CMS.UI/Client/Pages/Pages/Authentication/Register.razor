@@ -7,22 +7,31 @@
 <MudText Typo="Typo.h4" GutterBottom="true">Sign Up</MudText>
 <MudText>Already have an account? <MudLink Href="/pages/authentication/login">Sign In</MudLink></MudText>
 
-<MudTextField T="string" Label="Username" Variant="Variant.Outlined" Class="my-4"></MudTextField>
+<MudTextField @bind-Value="@Username" T="string" Label="Username" InputType="@UsernameInput" Variant="Variant.Outlined" Class="my-4"></MudTextField>
 
-<MudTextField T="string" Label="E-mail" Variant="Variant.Outlined"></MudTextField>
+<MudTextField @bind-Value="@Email" T="string" Label="E-mail" InputType="@EmailInput" Variant="Variant.Outlined"></MudTextField>
 
 <MudTextField @bind-Value="@Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="TogglePasswordVisibility" Class="mt-4"/>
+
+<MudTextField @bind-Value="@Role" Label="Role" Variant="Variant.Outlined" InputType="@RoleInput" Class="mt-4"/>
 
 <MudCheckBox @bind-Checked="@AgreeToTerms" Label="I agree to the terms and privacy" Color="Color.Primary" Class="ml-n1 my-3"></MudCheckBox>
 
 <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!AgreeToTerms)" Link="/pages/authentication/login" Size="Size.Large" FullWidth="true">Register</MudButton>
 
 @code {
-    string Password { get; set; }
+    string Username { get; set; } = "";
+    string Password { get; set; } = "";
+    string Email { get; set; } = "";
+    string Role { get; set; } = "";
+
     public bool AgreeToTerms { get; set; }
 
     bool PasswordVisibility;
     InputType PasswordInput = InputType.Password;
+    InputType EmailInput = InputType.Email;
+    InputType RoleInput = InputType.Text;
+    InputType UsernameInput = InputType.Text;
     string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
 
     void TogglePasswordVisibility()

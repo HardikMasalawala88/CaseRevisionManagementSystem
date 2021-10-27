@@ -10,8 +10,8 @@ namespace CMS.Services.Interface
 {
     public interface IUserService
     {
-        User GetUserDetails(LoginFM loginUser);
-        IList<string> GetUserRole(User user);
-        UserFM CreateOrUpdateUser(UserFM userFM);
+        //ApplicationUser GetUserDetails(LoginFM loginUser);
+        //IList<string> GetUserRole(ApplicationUser user);
+        bool CreateOrUpdateUser(ApplicationUserFM userFM);
     }
 }

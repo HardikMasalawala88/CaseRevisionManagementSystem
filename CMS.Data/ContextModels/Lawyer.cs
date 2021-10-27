@@ -12,8 +12,8 @@ namespace CMS.Data.ContextModels
         {
             this.Cases = new HashSet<Case>();
         }
-        public long UserId { get; set; }
-        public virtual User User { get; set; }
+        public string UserId { get; set; }
+        public virtual ApplicationUser ApplicationUser { get; set; }
         public DateTime? DateOfBirth { get; set; } = DateTime.UtcNow;
         public long AadharNumber { get; set; }
         public long PanCardNumber { get; set; }

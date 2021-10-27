@@ -3,7 +3,8 @@
 @layout LoginLayout
 @inject HttpClient Http
 @using CMS.UI.Shared
-
+@using Newtonsoft.Json
+@inject HttpClient client
 
 
 <MudText Typo="Typo.h4" GutterBottom="true">Sign In</MudText>
@@ -46,15 +47,29 @@
         }
     }
 
-    private WeatherForecast[] forecasts;
+    //private WeatherForecast[] forecasts;
+    public IEnumerable<WeatherForecast> forecasts { get; set; } = Enumerable.Empty<WeatherForecast>();
+    private readonly HttpClient _httpClient;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+        //using (var httpClient = new HttpClient())
+        //{
+        //    using (var response = await httpClient.GetAsync(""))
+        //    {
+        //        string apiResponse = await response.Content.ReadAsStringAsync();
+        //        forecasts = JsonConvert.DeserializeObject<List<WeatherForecast>>(apiResponse);
+        //    }
+        //}
+        //forecasts = JsonConvert.DeserializeObject<WeatherForecast[]>("WeatherForecast");  
+        //await _httpClient.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
     }
-    protected void OnLogin()
+
+    void OnLogin()
     {
+        //userLogin = await Http.GetFromJsonAsync<Account[]>("Account");
         Console.Write(Username, Password);
+       // var dataset = await _httpClient.PostAsJsonAsync<object[]>("Account/Login");
     }
 
 }

@@ -15,7 +15,7 @@ namespace CMS.API.Controllers
 {
     [Authorize(ApplicationUserRoles.SuperAdmin)]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class SuperAdminController : Controller
     {
         private readonly ILogger<SuperAdminController> _logger;
@@ -34,10 +34,10 @@ namespace CMS.API.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        public IActionResult AddAdmin(UserFM userForm)
+        public IActionResult AddAdmin(ApplicationUserFM userForm)
         {
-            var Admindata = _userService.CreateOrUpdateUser(userForm);
-            if(Admindata != null)
+            bool Admindata = _userService.CreateOrUpdateUser(userForm);
+            if(Admindata)
             {
                 return Ok(new Response { Status = "Success", Message = "Admin Added Successfully...!" });
             }
@@ -53,11 +53,10 @@ namespace CMS.API.Controllers
 
         [HttpPost]
         [Route("[action]")]
-      //  [Authorize(ApplicationUserRoles.Admin)]
         public IActionResult AddLawyer(LawyerFM lawyerForm)
         {
             var loggedInUser = HttpContext.Session.GetString("UserId");
-            lawyerForm.User.CreatedBy = loggedInUser;
+            lawyerForm.ApplicationUser.CreatedBy = loggedInUser;
             var lawyerData = _lawyerService.CreateOrUpdateLawyer(lawyerForm);
             if(lawyerData != null)
             {
@@ -79,7 +78,7 @@ namespace CMS.API.Controllers
         public IActionResult UpdateLawyer(LawyerFM lawyerForm)
         {
             var loggedInUser = HttpContext.Session.GetString("UserId");
-            lawyerForm.User.ModifiedBy = loggedInUser;
+            lawyerForm.ApplicationUser.ModifiedBy = loggedInUser;
             var lawyerUpdatedData = _lawyerService.CreateOrUpdateLawyer(lawyerForm);
             if(lawyerUpdatedData != null)
             {
@@ -97,7 +96,6 @@ namespace CMS.API.Controllers
 
         [HttpPost]
         [Route("[action]")]
-       // [Authorize(ApplicationUserRoles.Admin)]
         public IActionResult LawyerDetails()
         {
             var lawyerDetails = _lawyerService.ListLawyerData().FirstOrDefault();

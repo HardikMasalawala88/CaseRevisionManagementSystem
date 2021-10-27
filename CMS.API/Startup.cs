@@ -1,4 +1,5 @@
 using CMS.API.Extension;
+using CMS.API.Utilities;
 using CMS.Data.ContextModels;
 using CMS.Repository;
 using CMS.Repository.Interface;
@@ -47,10 +48,12 @@ namespace CMS.API
             services.AddTransient<ILawyerService, LawyerService>();
             services.AddTransient<IClientService, ClientService>();
             services.AddTransient<ICaseService, CaseService>();
-            services.AddTransient<IUserRepository, UserRepository>();
+
+            services.AddTransient<IAppUserRepository, AppUserRepository>();
             services.AddTransient<ILawyerRepository, LawyerRepository>();
             services.AddTransient<IClientRepository, ClientRepository>();
             services.AddTransient<ICaseRepository, CaseRepository>();
+
             services.AddDbContext<ApplicationContext>(item => item.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.IntegrateSwagger();
             //For Identity
@@ -107,6 +110,8 @@ namespace CMS.API
             {
                 endpoints.MapControllers();
             });
+            SeedMethod.Initialize(app.ApplicationServices);
+
         }
     }
 }

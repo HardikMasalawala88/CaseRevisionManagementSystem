@@ -10,5 +10,6 @@ namespace CMS.Data.FormModels
     {
         public string Message { get; set; }
         public string Status { get; set; }
+        public object Data { get; set; }
     }
 }

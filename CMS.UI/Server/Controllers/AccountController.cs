@@ -1,14 +1,9 @@
-﻿using CMS.API.Utilities;
-using CMS.Data.ContextModels;
-using CMS.Data.FormModels;
-using CMS.Services.Interface;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace CMS.UI.Server.Controllers
@@ -17,33 +12,29 @@ namespace CMS.UI.Server.Controllers
     [Route("[controller]")]
     public class AccountController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly ILogger<AccountController> _logger;
-        private readonly JWTTokenGenerator _jWTTokenGenerator;
-        private readonly IUserService _userService;
-        private readonly IConfiguration _config;
-        private ApplicationContext _context;
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, ILogger<AccountController> logger, IUserService userService, ApplicationContext context, IConfiguration config)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _roleManager = roleManager;
-            _logger = logger;
-            _jWTTokenGenerator = new JWTTokenGenerator(config);
-            _userService = userService;
-            _context = context;
-            _config = config;
-        }
-
-        public async Task<IActionResult> Register(RegisterFM registerModel)
+        public AccountController()
         {
 
         }
 
-        public async Task<IActionResult> Login(LoginFM loginUser)
+        public async Task LoginAsync()
         {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("https://localhost:44389/api/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                //GET Method
+                HttpResponseMessage response = await client.GetAsync("Account/Login");
+                if (response.IsSuccessStatusCode)
+                {
+                    var data = await response.Content.ReadAsStringAsync();
+                }
+                else
+                {
+
+                }
+            }
         }
 
     }

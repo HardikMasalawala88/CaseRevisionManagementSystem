@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace CMS.API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class AccountController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -41,7 +41,7 @@ namespace CMS.API.Controllers
         [Route("[action]")]
         public async Task<IActionResult> Register(RegisterFM registerModel)
         {
-            var userExists = await _userManager.FindByNameAsync(registerModel.Username);
+            var userExists = await _userManager.FindByEmailAsync(registerModel.Email);
             if (userExists != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response
@@ -55,7 +55,6 @@ namespace CMS.API.Controllers
             {
                 Email = registerModel.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = registerModel.Username
             };
 
             // Create User
@@ -70,10 +69,10 @@ namespace CMS.API.Controllers
             }
 
             //Checking roles in db and creating if not exists
-            if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.SuperAdmin))
-            {
-                await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.SuperAdmin));
-            }
+            //if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.SuperAdmin))
+            //{
+            //    await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.SuperAdmin));
+            //}
             if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.Admin))
             {
                 await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.Admin));
@@ -92,10 +91,10 @@ namespace CMS.API.Controllers
             {
                 await _userManager.AddToRoleAsync(user, ApplicationUserRoles.Admin);
             }
-            else if (!string.IsNullOrEmpty(registerModel.Role) && registerModel.Role == ApplicationUserRoles.SuperAdmin)
-            {
-                await _userManager.AddToRoleAsync(user, ApplicationUserRoles.SuperAdmin);
-            }
+            //else if (!string.IsNullOrEmpty(registerModel.Role) && registerModel.Role == ApplicationUserRoles.SuperAdmin)
+            //{
+            //    await _userManager.AddToRoleAsync(user, ApplicationUserRoles.SuperAdmin);
+            //}
             else if (!string.IsNullOrEmpty(registerModel.Role) && registerModel.Role == ApplicationUserRoles.Lawyer)
             {
                 await _userManager.AddToRoleAsync(user, ApplicationUserRoles.Lawyer);
@@ -105,29 +104,37 @@ namespace CMS.API.Controllers
                 await _userManager.AddToRoleAsync(user, ApplicationUserRoles.User);
             }
 
-            return Ok(new Response { Status = "Success", Message = "User Created Successfully...!" });
+            return Ok(new Response { Status = "Success", Message = "User Created Successfully...!",Data = user });
         }
 
         [HttpPost]
         [Route("[action]")]
         public async Task<IActionResult> Login(LoginFM loginUser)
         {
-            var user = await _userManager.FindByNameAsync(loginUser.Username);
+            var user = await _userManager.FindByEmailAsync(loginUser.Email);
             if (user != null && await _userManager.CheckPasswordAsync(user, loginUser.Password))
             {
+                if (!await _roleManager.RoleExistsAsync(ApplicationUserRoles.SuperAdmin))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(ApplicationUserRoles.SuperAdmin));
+                }
+                if (!string.IsNullOrEmpty(user.Role) && user.Role == ApplicationUserRoles.SuperAdmin)
+                {
+                    await _userManager.AddToRoleAsync(user, ApplicationUserRoles.SuperAdmin);
+                }
                 IList<string> userRole = await _userManager.GetRolesAsync(user);
                 string token = _jWTTokenGenerator.GenerateLoginToken(user.UserName, userRole);
                 HttpContext.Session.SetString("UserId", user.Id);
-                return Ok(token);
+                return Ok(new Response { Status = "Success", Message = "User LoggedIn Successfully...!", Data = token });
             }
-            var userData = _userService.GetUserDetails(loginUser);
-            if (userData != null)
-            {
-                HttpContext.Session.SetString("UserId", userData.Id.ToString());
-                IList<string> userRole = _userService.GetUserRole(userData);
-                string token = _jWTTokenGenerator.GenerateLoginToken(userData.Username, userRole);
-                return Ok(token);
-            }
+            //var userData = _userService.GetUserDetails(loginUser);
+            //if (userData != null)
+            //{
+            //    HttpContext.Session.SetString("UserId", userData.Id.ToString());
+            //    IList<string> userRole = _userService.GetUserRole(userData);
+            //    string token = _jWTTokenGenerator.GenerateLoginToken(userData.Username, userRole);
+            //    return Ok(new Response { Status = "Success", Message = "User LoggedIn Successfully...!", Data = token });
+            //}
             return Unauthorized();
         }
     }

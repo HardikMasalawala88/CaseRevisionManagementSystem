@@ -10,8 +10,8 @@ namespace CMS.Data.FormModels
     public class LawyerFM
     {
         public long Id { get; set; }
-        public long UserId { get; set; }
-        public virtual User User { get; set; }
+        public string UserId { get; set; }
+        public virtual ApplicationUser ApplicationUser { get; set; }
         public DateTime? DateOfBirth { get; set; } 
         public long AadharNumber { get; set; }
         public long PanCardNumber { get; set; }

@@ -13,10 +13,10 @@ namespace CMS.Services
     public class ClientService : IClientService
     {
         private readonly IClientRepository _clientRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IAppUserRepository _userRepository;
         private readonly ApplicationContext _context;
 
-        public ClientService(IClientRepository clientRepository, ApplicationContext context, IUserRepository userRepository)
+        public ClientService(IClientRepository clientRepository, ApplicationContext context, IAppUserRepository userRepository)
         {
             _clientRepository = clientRepository;
             _userRepository = userRepository;
@@ -29,17 +29,17 @@ namespace CMS.Services
                 var clientDetail = _context.Clients.Where(x => x.Id == clientFM.Id).FirstOrDefault();
                 if (clientDetail != null)
                 {
-                    User user = new User();
-                    user.Name = clientFM.User.Name;
-                    user.EmailId = clientFM.User.EmailId;
-                    user.MobileNo = clientFM.User.MobileNo;
-                    user.Address = clientFM.User.Address;
-                    user.City = clientFM.User.City;
-                    user.Gender = clientFM.User.Gender;
-                    user.Role = clientFM.User.Role;
-                    user.Username = clientFM.User.Username;
-                    user.ModifiedBy = clientFM.User.ModifiedBy;
-                    user.Password = clientFM.User.Password;
+                    ApplicationUser user = new ApplicationUser();
+                    user.Name = clientFM.ApplicationUser.Name;
+                    user.Email = clientFM.ApplicationUser.Email;
+                    user.PhoneNumber = clientFM.ApplicationUser.PhoneNumber;
+                    user.Address = clientFM.ApplicationUser.Address;
+                    user.City = clientFM.ApplicationUser.City;
+                    user.Gender = clientFM.ApplicationUser.Gender;
+                    user.Role = clientFM.ApplicationUser.Role;
+                    user.UserName = clientFM.ApplicationUser.UserName;
+                    user.ModifiedBy = clientFM.ApplicationUser.ModifiedBy;
+                    user.PhoneNumber = clientFM.ApplicationUser.PasswordHash;
                     user.ModifiedDate = DateTime.UtcNow;
 
                     _userRepository.UpdateUser(user);
@@ -59,17 +59,19 @@ namespace CMS.Services
                 }
                 else
                 {
-                    User user = new User();
-                    user.Name = clientFM.User.Name;
-                    user.EmailId = clientFM.User.EmailId;
-                    user.MobileNo = clientFM.User.MobileNo;
-                    user.Address = clientFM.User.Address;
-                    user.City = clientFM.User.City;
-                    user.Gender = clientFM.User.Gender;
-                    user.Role = clientFM.User.Role;
-                    user.Username = clientFM.User.Username;
-                    user.Password = clientFM.User.Password;
-                    user.CreatedBy = clientFM.User.CreatedBy;
+                    ApplicationUser user = new ApplicationUser();
+                    user.Name = clientFM.ApplicationUser.Name;
+                    user.Email = clientFM.ApplicationUser.Email;
+                    user.PhoneNumber = clientFM.ApplicationUser.PhoneNumber;
+                    user.Address = clientFM.ApplicationUser.Address;
+                    user.City = clientFM.ApplicationUser.City;
+                    user.Gender = clientFM.ApplicationUser.Gender;
+                    user.Role = clientFM.ApplicationUser.Role;
+                    user.UserName = clientFM.ApplicationUser.UserName;
+                    user.ModifiedBy = clientFM.ApplicationUser.ModifiedBy;
+                    user.PhoneNumber = clientFM.ApplicationUser.PasswordHash;
+                    user.ModifiedDate = DateTime.UtcNow;
+                    user.CreatedBy = clientFM.ApplicationUser.CreatedBy;
                     _userRepository.InsertUser(user);
 
                     Client client = new Client();
@@ -83,7 +85,7 @@ namespace CMS.Services
 
                     _clientRepository.InsertClient(client);
                     clientFM.Id = client.Id;
-                    clientFM.UserId = client.User.Id;
+                    clientFM.UserId = client.ApplicationUser.Id;
                 }
             }
             catch (Exception ex)
@@ -96,7 +98,6 @@ namespace CMS.Services
         public IEnumerable<Client> ListClientData()
         {
             var clientInfo = _clientRepository.GetClients().Where(x => x.IsDelete != true).ToList();
-            // lawyerInfo.User = _userRepository.GetUser(lawyerInfo.UserId);
             return clientInfo;
         }
 
@@ -109,12 +110,12 @@ namespace CMS.Services
         public bool RemoveClient(long clientId)
         {
             var clientData = _clientRepository.GetClient(clientId);
-            clientData.User = _userRepository.GetUser(clientData.UserId);
+            clientData.ApplicationUser = _userRepository.GetUser(clientData.UserId);
             if (clientData != null)
             {
                 _clientRepository.DeleteClient(clientId);
 
-                _userRepository.DeleteUser(clientData.User.Id);
+                _userRepository.DeleteUser(clientData.ApplicationUser.Id);
 
                 return true;
             }
