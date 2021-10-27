@@ -1,4 +1,5 @@
 using BServerApp.Data;
+using BServerApp.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace BServerApp
@@ -29,6 +31,11 @@ namespace BServerApp
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+            services.AddSingleton<SampleService>();
+            services.AddScoped<HttpClient>(s =>
+            {
+                return new HttpClient { BaseAddress = new Uri("https://localhost:44389/") };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

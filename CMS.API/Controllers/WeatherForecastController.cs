@@ -5,10 +5,10 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CMS.API.Controllers
 {
-    [Authorize(ApplicationUserRoles.SuperAdmin)]
     [ApiController]
     [Route("api/[controller]")]
     public class WeatherForecastController : ControllerBase
@@ -35,7 +35,20 @@ namespace CMS.API.Controllers
                 TemperatureC = rng.Next(-20, 55),
                 Summary = Summaries[rng.Next(Summaries.Length)]
             })
-            .ToArray();
+            .ToArray().ToList();
+        }
+
+        [Route("[action]")]
+        [HttpGet]
+        public Task<WeatherForecast[]> GetForecastList()
+        {
+            var rng = new Random();
+            return Task.FromResult(Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            {
+                Date = DateTime.Now.AddDays(index),
+                TemperatureC = rng.Next(-20, 55),
+                Summary = Summaries[rng.Next(Summaries.Length)]
+            }).ToArray());
         }
     }
 }

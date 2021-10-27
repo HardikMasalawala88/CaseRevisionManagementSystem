@@ -1,8 +1,11 @@
 ﻿@page "/fetchdata"
 
 @using BServerApp.Data
+@using BServerApp.Services
 @inject WeatherForecastService ForecastService
-
+@inject SampleService SampleService
+@inject HttpClient client
+@using Newtonsoft.Json
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
@@ -38,9 +41,23 @@ else
 
 @code {
     private WeatherForecast[] forecasts;
+    private SampleClass[] sampleList;
 
     protected override async Task OnInitializedAsync()
     {
         forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        sampleList = await SampleService.GetForecastAsync(DateTime.Now);
+
+
+        var apiName = "api/WeatherForecast/GetForecastList";
+        var httpResponse = await client.GetAsync(apiName);
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            List<WeatherForecast> responseData = JsonConvert.DeserializeObject<List<WeatherForecast>>(await httpResponse.Content.ReadAsStringAsync());
+            //forecasts = responseData.weatherForecasts;
+            StateHasChanged();
+        }
     }
 }
+
+

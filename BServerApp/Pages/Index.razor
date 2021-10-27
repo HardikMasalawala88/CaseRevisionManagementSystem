@@ -1,7 +1,26 @@
 ﻿@page "/"
 
+@inject HttpClient client
+@using Newtonsoft.Json
+@using Data
+
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
 
 <SurveyPrompt Title="How is Blazor working for you?" />
+
+@code{
+    List<WeatherForecast> weatherForecasts = new List<WeatherForecast>();
+    private async void Get()
+    {
+        var apiName = "api/WeatherForecast";
+        var httpResponse = await client.GetAsync(apiName);
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            Response responseData = JsonConvert.DeserializeObject<Response>(await httpResponse.Content.ReadAsStringAsync());
+            weatherForecasts = responseData.weatherForecasts;
+            StateHasChanged();
+        }
+    }
+}
