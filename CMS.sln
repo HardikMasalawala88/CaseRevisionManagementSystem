@@ -10,7 +10,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CMS.Services", "CMS.Service
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CMS.Data", "CMS.Data\CMS.Data.csproj", "{CBC7EE6D-0510-4B3C-82A6-4252AFBFFE61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMS.UI", "CMS.UI\CMS.UI.csproj", "{732B2B48-2F0A-491A-BA86-89E05ADCC48F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMS.UI", "CMS.UI\CMS.UI.csproj", "{66C9C5CA-F3A5-4AF6-8F1A-5020818A838A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,10 +34,10 @@ Global
 		{CBC7EE6D-0510-4B3C-82A6-4252AFBFFE61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBC7EE6D-0510-4B3C-82A6-4252AFBFFE61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBC7EE6D-0510-4B3C-82A6-4252AFBFFE61}.Release|Any CPU.Build.0 = Release|Any CPU
-		{732B2B48-2F0A-491A-BA86-89E05ADCC48F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{732B2B48-2F0A-491A-BA86-89E05ADCC48F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{732B2B48-2F0A-491A-BA86-89E05ADCC48F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{732B2B48-2F0A-491A-BA86-89E05ADCC48F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66C9C5CA-F3A5-4AF6-8F1A-5020818A838A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66C9C5CA-F3A5-4AF6-8F1A-5020818A838A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66C9C5CA-F3A5-4AF6-8F1A-5020818A838A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66C9C5CA-F3A5-4AF6-8F1A-5020818A838A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

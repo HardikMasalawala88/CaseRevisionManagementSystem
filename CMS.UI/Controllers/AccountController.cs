@@ -1,30 +1,21 @@
-﻿using CMS.Data.FormModels;
-using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
 
 namespace CMS.UI.Controllers
 {
     public class AccountController : Controller
     {
-        [HttpGet]
-        public IActionResult Login()
+        // GET: Account
+        public ActionResult Login()
         {
             return View();
         }
 
         [HttpPost]
-        public IActionResult Login(LoginFM login)
-        {
-            return View();
-        }
-
-        [HttpGet]
-        public IActionResult Registration()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult Registration(RegisterFM register)
+        public ActionResult Registration()
         {
             return View();
         }
