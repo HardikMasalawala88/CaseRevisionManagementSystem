@@ -1,0 +1,61 @@
+﻿@page "/account/login"
+
+@using CMS.Data.FormModels
+@using CMS.Services.Interface
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+
+@inject NavigationManager NavigationManager
+@inject IAccountService AccountService
+@inject ProtectedSessionStorage Session
+
+<PageTitle>Login</PageTitle>
+
+<div class="card" style="width:50%;align-content:center;">
+    <h4 class="card-header">Login</h4>
+    <div class="card-body">
+        <EditForm Model="@loginFM" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <div class="form-group col-12 my-3">
+                <div class="form-group col-8">
+                    <label>Username</label>
+                    <InputText @bind-Value="loginFM.Username" class="form-control" />
+                    <ValidationMessage For="@(() => loginFM.Username)" />
+                </div>
+            </div>
+            <div class="form-group col-12 my-3">
+                <div class="form-group col-8">
+                    <label>Password</label>
+                    <InputText @bind-Value="loginFM.Password" type="password" class="form-control" />
+                    <ValidationMessage For="@(() => loginFM.Password)" />
+                </div>
+            </div>
+            <button type="submit" disabled="@loading" class="btn btn-primary">
+                @if (loading)
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Login
+            </button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginFM loginFM = new LoginFM();
+    private bool loading;
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            AccountService.Login(loginFM);
+            await Session.SetAsync("User", loginFM.Username);
+        }
+        catch (Exception ex)
+        {
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}

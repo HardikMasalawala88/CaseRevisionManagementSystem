@@ -31,7 +31,7 @@ namespace CMS.Services
                 {
                     User user = new User();
                     user.Name = clientFM.User.Name;
-                    user.EmailId = clientFM.User.EmailId;
+                    user.Email = clientFM.User.Email;
                     user.MobileNo = clientFM.User.MobileNo;
                     user.Address = clientFM.User.Address;
                     user.City = clientFM.User.City;
@@ -61,7 +61,7 @@ namespace CMS.Services
                 {
                     User user = new User();
                     user.Name = clientFM.User.Name;
-                    user.EmailId = clientFM.User.EmailId;
+                    user.Email = clientFM.User.Email;
                     user.MobileNo = clientFM.User.MobileNo;
                     user.Address = clientFM.User.Address;
                     user.City = clientFM.User.City;
@@ -103,6 +103,12 @@ namespace CMS.Services
         public Client GetClientData(long clientId)
         {
             var clientDetail = _clientRepository.GetClient(clientId);
+            return clientDetail;
+        }
+        
+        public Client GetClientUsingUserId(long userId)
+        {
+            var clientDetail = _context.Clients.FirstOrDefault(x => x.UserId == userId);
             return clientDetail;
         }
 

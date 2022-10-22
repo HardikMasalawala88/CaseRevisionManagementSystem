@@ -20,6 +20,7 @@ namespace CMS.Services
             _clientAndcaseRepository = clientAndcaseRepository;
             _context = context;
         }
+
         public CaseFM CreateOrUpdateCase(CaseFM caseFM)
         {
             try
@@ -45,7 +46,7 @@ namespace CMS.Services
                 {
                     Case caseInfo = new Case();
                     caseInfo.ClientId = caseFM.Client.Id;
-                    caseInfo.LawyerId = caseFM.Lawyer.Id;
+                    caseInfo.LawyerId = caseFM.LawyerId;
                     caseInfo.HearingDate = caseFM.HearingDate;
                     caseInfo.CaseDetail = caseFM.CaseDetail;
                     caseInfo.CourtLocation = caseFM.CourtLocation;

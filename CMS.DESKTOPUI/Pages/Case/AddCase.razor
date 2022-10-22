@@ -1,0 +1,77 @@
+﻿@page "/case/add"
+@using CMS.Data.ContextModels
+@using CMS.Data.FormModels
+@using CMS.Repository.Interface
+@using CMS.Services.Interface
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+
+@inject ICaseService CaseService
+@inject IClientService ClientService
+@inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage Session
+@inject IUserRepository UserRepository
+
+<h2>Add Case</h2>
+<hr/>
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-row col-12 my-3">
+        <div class="form-group col-6">
+            <label>Case Detail: </label>
+            <InputTextArea @bind-Value="model.CaseDetail" class="form-control" />
+            <ValidationMessage For="@(() => model.CaseDetail)" />
+        </div>
+        <div class="form-group col-6 mt-2">
+            <label>CourtLocation: </label>
+            <InputText @bind-Value="model.CourtLocation" class="form-control" />
+            <ValidationMessage For="@(() => model.CourtLocation)" />
+        </div>
+    </div>
+    <div class="form-row col-12 my-3">
+        <div class="form-group col-6">
+            <label>HearingDate: </label>
+            <InputDate @bind-Value="model.HearingDate" class="form-control" />
+            <ValidationMessage For="@(() => model.HearingDate)" />
+        </div>
+    </div>
+    <div class="form-group col-12 my-2">
+        <button type="submit" class="btn btn-primary">
+            <span class="spinner-border spinner-border-sm mr-1"></span>
+            Save
+        </button>
+    </div>
+</EditForm>
+
+@code
+{
+    ProtectedBrowserStorageResult<string> userName = new ProtectedBrowserStorageResult<string>();
+    private CaseFM model = new CaseFM();
+    private User userData = new User();
+    private Client clientData = new Client();
+
+    protected override async Task OnInitializedAsync()
+    {
+        userName = await Session.GetAsync<string>("User");
+        userData = UserRepository.GetLoggedInUser(userName.Value);
+        clientData = ClientService.GetClientUsingUserId(userData.Id);
+        base.OnInitialized();
+    }
+
+    private void OnValidSubmit()
+    { 
+        try
+        {
+            model.Client = clientData;
+            model.ClientId = clientData.Id;
+            model.LawyerId = userData.Id;
+            CaseService.CreateOrUpdateCase(model);
+            NavigationManager.NavigateTo("case/caselist");
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+    }
+
+}

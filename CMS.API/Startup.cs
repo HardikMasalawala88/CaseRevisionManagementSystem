@@ -1,5 +1,7 @@
 using Autofac;
+using AutoMapper;
 using CMS.API.Extension;
+using CMS.API.Utilities;
 using CMS.Data.ContextModels;
 using CMS.Repository;
 using CMS.Repository.Interface;
@@ -9,6 +11,7 @@ using CMS.Services.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +35,15 @@ namespace CMS.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Inject AutoMapper
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
+
             //services.AddControllers();
             services.AddRazorPages();
             services.AddMvc();
@@ -44,9 +56,11 @@ namespace CMS.API
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<ILawyerRepository, LawyerRepository>();
             services.AddTransient<IClientRepository, ClientRepository>();
+            services.AddTransient<IAccountService, AccountService>();
             services.AddTransient<ICaseRepository, CaseRepository>();
             services.AddDbContext<ApplicationContext>(item => item.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.IntegrateSwagger();
+            services.AddSwaggerGen();
             //For Identity
             services.IdentityImplementation();            
 
@@ -96,7 +110,7 @@ namespace CMS.API
 
             app.UseStaticFiles();
 
-            //app.UseRouting();
+            app.UseRouting();
 
             app.UseSession();
 

@@ -14,5 +14,6 @@ namespace CMS.Services.Interface
         IEnumerable<Client> ListClientData();
         Client GetClientData(long clientId);
         bool RemoveClient(long clientId);
+        Client GetClientUsingUserId(long userId);
     }
 }

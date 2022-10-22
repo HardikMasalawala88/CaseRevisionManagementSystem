@@ -26,6 +26,11 @@ namespace CMS.Repository
             _userRepository.SaveChanges();
         }
 
+        public User GetLoggedInUser(string username)
+        {
+            return _userRepository.GetByUsername(username);
+        }
+
         public User GetUser(long id)
         {
             return _userRepository.GetById(id);

@@ -32,7 +32,7 @@ namespace CMS.Services
                 {
                     User user = new User();
                     user.Name = lawyerFM.User.Name;
-                    user.EmailId = lawyerFM.User.EmailId;
+                    user.Email = lawyerFM.User.Email;
                     user.MobileNo = lawyerFM.User.MobileNo;
                     user.Address = lawyerFM.User.Address;
                     user.City = lawyerFM.User.City;
@@ -65,7 +65,7 @@ namespace CMS.Services
                 {
                     User user = new User();
                     user.Name = lawyerFM.User.Name;
-                    user.EmailId = lawyerFM.User.EmailId;
+                    user.Email = lawyerFM.User.Email;
                     user.MobileNo = lawyerFM.User.MobileNo;
                     user.Address = lawyerFM.User.Address;
                     user.City = lawyerFM.User.City;

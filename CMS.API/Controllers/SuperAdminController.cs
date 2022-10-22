@@ -6,10 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace CMS.API.Controllers
 {
@@ -53,7 +50,6 @@ namespace CMS.API.Controllers
 
         [HttpPost]
         [Route("[action]")]
-      //  [Authorize(ApplicationUserRoles.Admin)]
         public IActionResult AddLawyer(LawyerFM lawyerForm)
         {
             var loggedInUser = HttpContext.Session.GetString("UserId");
@@ -75,7 +71,6 @@ namespace CMS.API.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        //[Authorize(ApplicationUserRoles.Admin)]
         public IActionResult UpdateLawyer(LawyerFM lawyerForm)
         {
             var loggedInUser = HttpContext.Session.GetString("UserId");

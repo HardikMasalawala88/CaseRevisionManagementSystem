@@ -31,7 +31,7 @@ namespace CMS.Services
                     User user = new User();
                     user.Id = userDetails.Id;
                     user.Name = userDetails.Name;
-                    user.EmailId = userDetails.EmailId;
+                    user.Email = userDetails.Email;
                     user.Gender = userDetails.Gender;
                     user.Address = userDetails.Address;
                     user.City = userDetails.City;
@@ -47,7 +47,7 @@ namespace CMS.Services
                 {
                     User user = new User();
                     user.Name = userFM.Name;
-                    user.EmailId = userFM.EmailId;
+                    user.Email = userFM.EmailId;
                     user.Gender = userFM.Gender;
                     user.Address = userFM.Address;
                     user.City = userFM.City;

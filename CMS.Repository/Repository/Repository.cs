@@ -38,6 +38,11 @@ namespace CMS.Repository.Repository
         {
             return entities.SingleOrDefault(s => s.Id == id);
         }
+        
+        public User GetByUsername(string userName)
+        {
+            return _context.UserData.Where(x => x.Username == userName).FirstOrDefault();
+        }
 
         public T Insert(T entity)
         {

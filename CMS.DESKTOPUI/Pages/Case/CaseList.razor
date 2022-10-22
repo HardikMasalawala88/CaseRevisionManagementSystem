@@ -1,0 +1,121 @@
+﻿@page "/case/caselist"
+
+@using CMS.Data.ContextModels
+@using CMS.Services.Interface
+
+@inject ICaseService CaseService
+
+<h3>Case List</h3>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <a href='/case/add' class="btn btn-primary" role="button">
+            <i class="fas fa-plus"></i>
+            Add Case
+        </a>
+    </div>
+    <div class="input-group col">
+        <input type="text" class="form-control" placeholder="Search case"
+               @bind="SearchString" @bind:event="oninput" @onkeyup="FilterCase" />
+        @if (SearchString.Length > 0)
+        {
+            <div class="input-group-append">
+                <button class="btn btn-danger" @onclick="ResetSearch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@if (caseList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped align-middle table-bordered mt-5">
+        <thead class="table-success">
+            <tr>
+                <th>ClientId</th>
+                <th>LawyerId</th>
+                <th>CaseDetail</th>
+                <th>HearingDate</th>
+                <th>CourtLocation</th>
+                <th>CaseParentId</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (caseList.Count() > 0)
+            {
+                foreach (var caseItem in caseList)
+                {
+                    <tr>
+                        <td>@caseData.ClientId</td>
+                        <td>@caseData.LawyerId</td>
+                        <td>@caseData.CaseDetail</td>
+                        <td>@caseData.HearingDate</td>
+                        <td>@caseData.CourtLocation</td>
+                        <td>@caseData.CaseParentId</td>
+                        <td>
+                            <a href='/case/edit/@caseItem.Id' class="btn btn-outline-dark" role="button">
+                                Edit
+                            </a>
+                            <a href='/case/delete/@caseItem.Id' class="btn btn-outline-danger" role="button">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else{
+                <tr>
+                    <td colspan="6" class="text-center">No Data Found..!</td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+}
+@code {
+    private List<Case> caseList = new();
+    private List<Case> searchCaseData = new();
+    private Case caseData = new();
+    private string SearchString { get; set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        GetCase();
+    }
+
+    private void GetCase()
+    {
+        caseList = CaseService.ListCaseDetail().ToList();
+        searchCaseData = caseList;
+    }
+
+    protected void FilterCase()
+    {
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            caseList = searchCaseData
+                .Where(x => x.CaseDetail.IndexOf(SearchString, StringComparison.OrdinalIgnoreCase) != -1)
+                .ToList();
+        }
+        else
+        {
+            caseList = searchCaseData;
+        }
+    }
+
+    protected void DeleteConfirm(long caseId)
+    {
+        bool isDeleted = CaseService.RemoveCaseDetail(caseId);
+    }
+
+    public void ResetSearch()
+    {
+        SearchString = string.Empty;
+        caseList = searchCaseData;
+    }
+}
