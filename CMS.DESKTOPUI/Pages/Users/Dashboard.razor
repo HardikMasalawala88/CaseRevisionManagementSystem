@@ -1,0 +1,157 @@
+﻿@page "/user/dashboard"
+
+@using AutoMapper;
+@using CMS.DESKTOPUI.Pages.Case;
+@using CMS.DESKTOPUI.Pages.ScheduleAppointments;
+@using CMS.Data.FormModels;
+@using CMS.Services.Interface;
+@using Radzen;
+@using Radzen.Blazor
+
+@inject DialogService DialogService
+@inject ICaseService CaseService
+@inject IMapper Mapping
+
+<PageTitle>User Dashboard</PageTitle>
+
+<div class="row my-2">
+    <div class="col-6">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Wrap="FlexWrap.Wrap">
+            <RadzenButton Variant="Variant.Outlined" Click=@(args => GetTodayCaseReport()) Text=@($"Today's Case: {todayCaseCount}") ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Variant="Variant.Outlined" Click=@(args => GetWeeklyCaseReport()) Text=@($"Current week's Case: {weeklyCaseCount}") ButtonStyle="ButtonStyle.Primary" />
+        </RadzenStack>
+    </div>
+    <div class="col-6"></div>
+</div>
+<RadzenScheduler @ref=@scheduler SlotRender="@OnSlotRender" Style="height: 768px;" TItem="CaseFM" Data=@appointments StartProperty="HearingDate"
+                 TextProperty="CaseTitle" SelectedIndex="2" EndProperty="HearingDate"
+                 SlotSelect=@OnSlotSelect AppointmentSelect=@OnAppointmentSelect AppointmentRender=@OnAppointmentRender>
+    <RadzenDayView />
+    <RadzenWeekView />
+    <RadzenMonthView />
+    <RadzenYearView />
+</RadzenScheduler>
+
+
+@code{
+    RadzenScheduler<CaseFM> scheduler;
+    Dictionary<DateTime, string> events = new Dictionary<DateTime, string>();
+    List<CaseFM> appointments = new List<CaseFM>();
+    private int todayCaseCount = 0;
+    private int weeklyCaseCount = 0;
+
+    protected override Task OnInitializedAsync()
+    {
+        var caseList = CaseService.ListCaseDetail();
+        appointments = Mapping.Map<List<CaseFM>>(caseList);
+
+        GetTodayCaseReport();
+        GetWeeklyCaseReport();
+
+        return base.OnInitializedAsync();
+    }
+
+    void OnSlotRender(SchedulerSlotRenderEventArgs args)
+    {
+        // Highlight today in month view
+        if (args.View.Text == "Month" && args.Start.Date == DateTime.Today)
+        {
+            args.Attributes["style"] = "background: rgba(255,220,40,.2);";
+        }
+
+        // Highlight working hours (9-18) && args.Start.Hour > 8 && args.Start.Hour < 19
+        if ((args.View.Text == "Week" || args.View.Text == "Day") && args.Start.Hour >= 0 && args.Start.Hour < 19)
+        {
+            args.Attributes["style"] = "background: rgba(255,220,40,.2);";
+        }
+    }
+
+    private async Task OnSlotSelect(SchedulerSlotSelectEventArgs args)
+    {
+        if (args.View.Text != "Year")
+        {
+            var data = await DialogService.OpenAsync<AddEditCase>("",
+                 new Dictionary<string, object> { { "HearingDate", args.Start } });
+
+            if (data != null)
+            {
+                appointments.Add(data);
+                // Either call the Reload method or reassign the Data property of the Scheduler
+                await scheduler.Reload();
+            }
+        }
+    }
+
+    async Task OnAppointmentSelect(SchedulerAppointmentSelectEventArgs<CaseFM> args)
+    {
+        var copy = new CaseFM
+            {
+                Id = args.Data.Id,
+                CaseTitle = args.Data.CaseTitle,
+                ClientId = args.Data.ClientId,
+                HearingDate = args.Data.HearingDate,
+                CaseParentId = args.Data.CaseParentId.HasValue ? args.Data.CaseParentId.Value : 0,
+                CaseDetail = args.Data.CaseDetail,
+                CaseNumber = args.Data.CaseNumber,
+                CourtLocation = args.Data.CourtLocation
+            };
+
+        CaseFM data = await DialogService.OpenAsync<AddEditCase>("", new Dictionary<string, object> { { "CaseId", copy.Id } });
+
+        if (data != null)
+        {
+            // Update the appointment
+            args.Data.HearingDate = data.HearingDate;
+            args.Data.CaseTitle = data.CaseTitle;
+            args.Data.ClientId = data.ClientId;
+            args.Data.CaseDetail = data.CaseDetail;
+            args.Data.CourtLocation = data.CourtLocation;
+            args.Data.HearingDate = data.HearingDate;
+            args.Data.CaseNumber = data.CaseNumber;
+            args.Data.CaseParentId = data.CaseParentId;
+        }
+
+        await scheduler.Reload();
+    }
+
+    void OnAppointmentRender(SchedulerAppointmentRenderEventArgs<CaseFM> args)
+    {
+        // Never call StateHasChanged in AppointmentRender - would lead to infinite loop
+
+        //if (args.Data.CaseTitle == "Birthday")
+        //{
+        //    args.Attributes["style"] = "background: red";
+        //}
+    }
+
+    private async void OpenAsync(string title, Type type, Dictionary<string, object> parameters, DialogOptions options)
+    {
+        events.Add(DateTime.Now, "Dialog opened");
+        await InvokeAsync(() => { StateHasChanged(); });
+    }
+
+    private void GetTodayCaseReport()
+    {
+        var todayCaseList = appointments.Where(x => x.HearingDate.Date == DateTime.Now.Date).ToList();
+        if (todayCaseList is not null && todayCaseList.Any())
+        {
+            todayCaseCount = todayCaseList.Count;
+        }
+    }
+    
+    private void GetWeeklyCaseReport()
+    {
+        DateTime today = DateTime.Today;
+        int currentDayOfWeek = (int)today.DayOfWeek;
+
+        // Calculate the start and end dates of the current week
+        DateTime startOfWeek = today.AddDays(-currentDayOfWeek);
+        DateTime endOfWeek = startOfWeek.AddDays(6);
+
+        var weeklyCaseList = appointments.Where(x => x.HearingDate.Date >= startOfWeek && x.HearingDate.Date <= endOfWeek).ToList();
+        if (weeklyCaseList is not null && weeklyCaseList.Any())
+        {
+            weeklyCaseCount = weeklyCaseList.Count;
+        }
+    }
+}

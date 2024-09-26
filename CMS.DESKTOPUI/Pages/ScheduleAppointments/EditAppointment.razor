@@ -1,0 +1,96 @@
+﻿@using CMS.Data.ContextModels;
+@using CMS.Data.FormModels;
+@using CMS.Services.Interface;
+@using Radzen.Blazor
+@using Radzen;
+
+@inject IClientService ClientService
+@inject DialogService DialogService
+
+<RadzenTemplateForm TItem="CaseFM" Data="@model" Submit=@OnSubmit>
+    <div class="row" style="margin-bottom: 16px">
+        <div class="col-md-3">
+            <RadzenLabel Text="CaseTitle" />
+        </div>
+        <div class="col">
+            <RadzenTextBox @bind-Value="@model.CaseTitle" Name="CaseTitle" />
+            <RadzenRequiredValidator Text="CaseTitle is required" Component="Text" />
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 16px">
+        <div class="col-md-3">
+            <RadzenLabel Text="SelectClient" />
+        </div>
+        <div class="col">
+            <RadzenDropDown TValue="string" @bind-Value="selectedClient" Name="ClientName" Data="@clients" Change="@OnChange" />
+            <RadzenRequiredValidator Text="Client is required" Component="ClientName" />
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 16px">
+        <div class="col-md-3">
+            <RadzenLabel Text="CaseDetail" />
+        </div>
+        <div class="col">
+            <RadzenTextBox @bind-Value="@model.CaseDetail" Name="CaseDetail" />
+            <RadzenRequiredValidator Text="CaseDetail is required" Component="Text" />
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 16px">
+        <div class="col-md-3">
+            <RadzenLabel Text="HearingDate" />
+        </div>
+        <div class="col">
+            <RadzenDatePicker @bind-Value="@model.HearingDate" Name="HearingDate" ShowTime="true" />
+            <RadzenRequiredValidator Text="HearingDate is required" Component="HearingDate" />
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 16px">
+        <div class="col-md-3">
+            <RadzenLabel Text="CourtLocation" />
+        </div>
+        <div class="col">
+            <RadzenTextBox @bind-Value="@model.CourtLocation" Name="CourtLocation" />
+            <RadzenRequiredValidator Text="CourtLocation is required" Component="Text" />
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 16px">
+        <div class="col-md-3">
+            <RadzenLabel Text="CaseNumber" />
+        </div>
+        <div class="col">
+            <RadzenTextBox @bind-Value="@model.CaseNumber" Name="CaseNumber" />
+            <RadzenRequiredValidator Text="CaseNumber is required" Component="CaseNumber" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Save" />
+        </div>
+    </div>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter]
+    public CaseFM Case { get; set; }
+
+    CaseFM model = new CaseFM();
+    private string selectedClient = string.Empty;
+    private List<string> clients = new List<string>();
+    private Client clientInfo = new Client();
+
+    protected override void OnParametersSet()
+    {
+        model = Case;
+    }
+
+    private void OnChange(object clientEmail)
+    {
+        clientInfo = ClientService.GetClientUsingEmail(clientEmail.ToString());
+    }
+
+    void OnSubmit(CaseFM model)
+    {
+        DialogService.Close(model);
+    }
+}

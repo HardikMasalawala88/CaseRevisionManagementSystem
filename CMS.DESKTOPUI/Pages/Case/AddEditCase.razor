@@ -1,0 +1,344 @@
+﻿@page "/case/add"
+@page "/case/edit/{CaseId:long}"
+
+@using CMS.Data.ContextModels
+@using CMS.Data.FormModels
+@using CMS.Repository.Interface
+@using CMS.Services.Interface
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Radzen;
+@using Radzen.Blazor
+
+@inject ICaseService CaseService
+@inject IClientService ClientService
+@inject ILawyerService LawyerService
+@inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage Session
+@inject IUserRepository UserRepository
+@inject IWebHostEnvironment WebEnvironment
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<RadzenColumn SizeMD="12">
+    <RadzenTemplateForm TItem="CaseFM" Data="@model" Submit=@OnValidSubmit>
+        <RadzenStack>
+            <RadzenRow>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Case Title" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@model.CaseTitle" Name="CaseTitle" />
+                        </ChildContent>
+                        <Helper><RadzenRequiredValidator Text="CaseTitle is required" Component="CaseTitle" /></Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Select Client" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenDropDown @ref="@radzenDropDown" @bind-SearchText="@searchText" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                                            Data=@clientList AllowClear="true" TValue="string"
+                                            @bind-Value=selectedClient Name="ClientName" Change="@OnChange" />
+                        </ChildContent>
+                        <Helper><RadzenRequiredValidator Text="Client is required" Component="ClientName" /></Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Hearing Date" Variant="@Variant.Outlined">
+                        <ChildContent><RadzenDatePicker @bind-Value=@value TValue="DateTime" ShowTime="true" HoursStep="1.5" MinutesStep="5" DateFormat="dd/MM/yyyy HH:mm" Name="HearingDate" /></ChildContent>
+                        <Helper><RadzenRequiredValidator Text="HearingDate is required" Component="HearingDate" /></Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Court Location" Variant="@Variant.Outlined">
+                        <ChildContent><RadzenTextBox @bind-Value="@model.CourtLocation" Name="CourtLocation" /></ChildContent>
+                        <Helper><RadzenRequiredValidator Text="CourtLocation is required" Component="CourtLocation" /></Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Case Number" Variant="@Variant.Outlined">
+                        <ChildContent><RadzenTextBox @bind-Value="@model.CaseNumber" Name="CaseNumber" /></ChildContent>
+                        <Helper><RadzenRequiredValidator Text="CaseNumber is required" Component="CaseNumber" /></Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Parent Case No" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenDropDown @ref="@radzenDropDown" @bind-SearchText="@searchCaseNumber" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true"
+                                            Data=@cases AllowClear="true" TValue="string" ValueProperty="CaseNumber" TextProperty="CaseNumber"
+                                            @bind-Value=selectedCaseParentId Change="@OnCaseNumberChange" />
+                        </ChildContent>
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow Gap="2rem" RowGap="2rem" class="rz-m-0">
+                <RadzenColumn Size="12">
+                    <RadzenCard Variant="Variant.Outlined" Style="padding:0.25rem">
+                        <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3">Case documents</RadzenText>
+                        <RadzenUpload @ref="uploadFile" ChooseText="Select Documents" Multiple="true" Auto="false" Accept=".pdf,.docx,.png,.jpg,.jpeg" InputAttributes="@(new Dictionary<string,object>(){ { "aria-label", "select file" }})"
+                                      Url="upload/multiple" Change="@(args => SelectFiles(args))" Style="width: 100%" />
+                    </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenFormField Text="Case Detail" Variant="@Variant.Outlined">
+                <ChildContent><RadzenTextArea @bind-Value="@model.CaseDetail" Name="CaseDetail" /></ChildContent>
+                <Helper><RadzenRequiredValidator Text="CaseDetail is required" Component="CaseDetail" /></Helper>
+            </RadzenFormField>
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Style="margin-top:10px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            <RadzenButton ButtonStyle="ButtonStyle.Primary" Icon="save" ButtonType="ButtonType.Submit" Text="Save" Variant="Variant.Filled" />
+            <RadzenButton ButtonStyle="ButtonStyle.Light" Shade="Shade.Lighter" Text="Close" Click="@(() => NavigationManager.NavigateTo("case/caselist"))" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenColumn>
+
+
+@if (caseDocuments is not null && caseDocuments.Any())
+{
+    <div class="ma-3 mb-5">
+        <h3>Case Documents:</h3>
+    </div>
+    <hr />
+    @foreach (var fileData in caseDocuments)
+    {
+        if (ImageExtensions.Contains(Path.GetExtension(fileData.FileName).ToUpperInvariant()))
+        {
+            <span style="cursor:pointer;" @onclick="@(() => openImgDocument(Path.Combine(fileData.Url,fileData.FileName)))">
+                @fileData.FileName
+            </span>
+            <hr />
+        }
+
+        if (Path.GetExtension(fileData.FileName).ToUpperInvariant().Equals(".PDF"))
+        {
+            <span style="cursor:pointer;" @onclick="@(() => openPdfDocument(fileData.Url))">
+                @fileData.FileName
+            </span>
+            <hr />
+        }
+
+        if (DocExtensions.Contains(Path.GetExtension(fileData.FileName).ToUpperInvariant()))
+        {
+            <a href="#" download="@fileData.FileName" target="_top">
+                @fileData.FileName
+            </a>
+            <hr />
+        }
+    }
+}
+
+@code
+{
+    [Parameter]
+    public long CaseId { get; set; }
+
+    [Parameter]
+    public DateTime HearingDate { get; set; }
+
+    [Parameter]
+    public CaseFM Case { get; set; }
+
+    ProtectedBrowserStorageResult<string> userName = new ProtectedBrowserStorageResult<string>();
+    private string title = string.Empty;
+    RadzenDropDown<string> radzenDropDown;
+    DateTime value = DateTime.Now;
+    private string searchText = "";
+    private string searchCaseNumber = "";
+    private CaseFM model = new CaseFM();
+    private string selectedClient = string.Empty;
+    private string selectedCaseParentId = string.Empty;
+    private List<CaseDocument> caseDocuments = new List<CaseDocument>();
+    private List<Case> cases;
+    private User userData = new User();
+    private Lawyer lawyerData = new Lawyer();
+    private List<Client> clients = new List<Client>();
+    private Client clientInfo = new Client();
+    private List<string> clientList = new List<string>();
+    private List<FileInfo> files = new();
+    private int maxFileSize = 1 * 1024 * 1024;
+    RadzenUpload uploadFile;
+    public static readonly List<string> ImageExtensions = new List<string> { ".JPG", ".JPEG", ".JPE", ".BMP", ".GIF", ".PNG" };
+    public static readonly List<string> DocExtensions = new List<string> { ".DOC", ".DOCX", ".CSV", ".XLS" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        cases = CaseService.ListCaseDetail();
+
+        if (CaseId > 0 || Case is not null)
+        {
+            title = "Edit Case";
+            model = CaseService.GetCaseById(CaseId);
+            var caseData = cases.FirstOrDefault(c => c.Id == model.CaseParentId);
+            if (model is not null && model.Id > 0)
+            {
+                selectedClient = ClientService.GetClientById(model.ClientId).User.Email;
+                clientInfo = ClientService.GetClientUsingEmail(selectedClient);
+                selectedCaseParentId = caseData != null ? caseData.CaseNumber : string.Empty;
+                value = model.HearingDate;
+            }
+            else
+            {
+                selectedClient = ClientService.GetClientById(Case.ClientId).User.Email;
+                clientInfo = ClientService.GetClientUsingEmail(selectedClient);
+                selectedCaseParentId = caseData != null ? caseData.CaseNumber : string.Empty;
+                value = Case.HearingDate;
+            }
+
+            caseDocuments = CaseService.ListCaseDocDetail();
+        }
+        else
+        {
+            title = "Add Case";
+        }
+
+        userName = await Session.GetAsync<string>("User");
+        userData = UserRepository.GetLoggedInUser(userName.Value);
+        lawyerData = LawyerService.GetLawyerDataByUserId(userData.Id);
+        clients = ClientService.GetClientsUsingLawyerId(userData.Username);
+        clientList = clients.Select(x => x.User.Email).Distinct().ToList();
+
+        base.OnInitialized();
+    }
+
+    private void OnChange(object clientEmail)
+    {
+        if (clientEmail is not null && !string.IsNullOrEmpty(clientEmail.ToString()))
+        {
+            clientInfo = ClientService.GetClientUsingEmail(clientEmail.ToString());
+        }
+    }
+
+    private void OnCaseNumberChange(object caseNumber)
+    {
+        if (selectedCaseParentId is not null)
+        {
+            model.CaseParentId = cases.First(c => c.CaseNumber == selectedCaseParentId).Id;
+        }
+        else
+        {
+            model.CaseParentId = 0;
+            if (Case != null)
+                Case.CaseParentId = 0;
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        model.HearingDate = HearingDate;
+        if (Case is not null)
+        {
+            model = Case;
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        try
+        {
+            if (CaseId > 0)
+            {
+                foreach (FileInfo file in files)
+                {
+                    try
+                    {
+                        var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+
+                        if (!Directory.Exists(uploadPath))
+                        {
+                            Directory.CreateDirectory(uploadPath);
+                        }
+
+                        var filePath = Path.Combine(uploadPath, file.Name);
+
+                        var fileStream = new FileStream(filePath, FileMode.Create);
+                        IFormFile formFile = new FormFile(fileStream, 0, fileStream.Length, file.Name, file.Name);
+
+                        // Save the file
+                        // using (var stream = new FileStream(filePath, FileMode.Create))
+                        // {
+                        //     await formFile.CopyToAsync(stream);
+                        // }
+
+                        CaseDocumentFM caseDocument = new CaseDocumentFM();
+                        caseDocument.FileName = file.Name;
+                        caseDocument.CaseId = CaseId;
+                        caseDocument.Url = uploadPath;
+
+                        CaseService.CreateOrUpdateCaseDocument(caseDocument);
+                    }
+                    catch (Exception ex)
+                    {
+                        NotificationService.Notify(new NotificationMessage
+                                {
+                                    Severity = NotificationSeverity.Error,
+                                    Summary = "Error",
+                                    Detail = ex.Message
+                                });
+                    }
+                }
+            }
+
+            model.Client = clients.Where(x => x.Id == clientInfo.Id).FirstOrDefault();
+            model.ClientId = clientInfo.Id;
+            model.HearingDate = value;
+            model.Lawyer = lawyerData;
+            model.LawyerId = lawyerData.Id;
+
+            var caseInfo = CaseService.CreateOrUpdateCase(model);
+            DialogService.Close(caseInfo);
+
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Error",
+                        Detail = ex.Message
+                    });
+        }
+    }
+
+    private void SelectFiles(UploadChangeEventArgs e)
+    {
+        files = e.Files.ToList();
+    }
+
+    void OnComplete(UploadCompleteEventArgs args, string name)
+    {
+        if (!string.IsNullOrEmpty(args.RawResponse))
+        {
+
+        }
+    }
+
+    private void openImgDocument(string url)
+    {
+        var index = url.Contains("UploadedFiles") ? url.LastIndexOf("UploadedFiles") : 0;
+        var path = url.Substring(index);
+        DialogService.Open("Case document", ds =>
+    @<div style="display: flex;justify-content: space-between;align-items: end; height: fit-content;">
+        <RadzenImage Path="@(path)" />
+    </div>);
+    }
+
+    private void openPdfDocument(string url)
+    {
+        var index = url.Contains("UploadedFiles") ? url.LastIndexOf("UploadedFiles") : 0;
+        var path = url.Substring(index);
+        DialogService.Open("Case document", ds =>
+    @<div style="display: flex;justify-content: space-between;align-items: end; height: fit-content;">
+        <iframe src="@path" style="width:750px;height:750px;" type="application/pdf" />
+    </div>
+        );
+    }
+}
+

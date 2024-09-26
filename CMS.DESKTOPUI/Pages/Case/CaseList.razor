@@ -1,0 +1,189 @@
+﻿@page "/case/caselist"
+@attribute [Authorize(Roles ="Lawyer")]
+
+@using CMS.Data.ContextModels
+@using CMS.Services.Interface
+@using Radzen.Blazor
+@using Radzen;
+
+@inject ICaseService CaseService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime Js
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<h3>Case List</h3>
+
+<div class="row my-2">
+    <div class="col-12 d-flex justify-content-end">
+        <RadzenButton Click=@(args => OnClick("/case/add")) Text="Add Case" Icon="add" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Medium" />
+    </div>
+    
+</div>
+
+@if (caseList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="col-12 d-flex justify-content-between">
+        <div class="col-8">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Wrap="FlexWrap.Wrap">
+                <RadzenLabel>From Date:</RadzenLabel><RadzenDatePicker TValue="DateTime" @bind-Value="@fromDate" DateFormat="dd/MM/yyyy" />
+                <RadzenLabel>To Date:</RadzenLabel><RadzenDatePicker TValue="DateTime" @bind-Value="@toDate" DateFormat="dd/MM/yyyy" />
+
+                <RadzenButton Click="@(args => FilterCases())" Text="Search" ButtonStyle="ButtonStyle.Primary" />
+            </RadzenStack>
+        </div>
+        <div class=" col-2 d-flex justify-content-end">
+            <RadzenButton Click="@(async args => await PrintCaseList())" Text="Print" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+
+    <table id="tblcase" class="case-table printable-table table table-striped align-middle table-bordered mt-5 table-to-print">
+        <thead class="table-success">
+            <tr>
+                <th>ClientName</th>
+                <th>CaseTitle</th>
+                <th>CaseDetail</th>
+                <th>HearingDate</th>
+                <th>CourtLocation</th>
+                <th>CaseNumber</th>
+                @if (caseList.Any())
+                {
+                    <th>Action</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (caseList.Count() > 0)
+            {
+                foreach (var caseItem in caseList)
+                {
+                    <tr>
+                        <td>@(caseItem.Client != null ? caseItem.Client.User.Name : string.Empty)</td>
+                        <td>@caseItem.CaseTitle</td>
+                        <td>@caseItem.CaseDetail</td>
+                        <td>@caseItem.HearingDate</td>
+                        <td>@caseItem.CourtLocation</td>
+                        <td>@caseItem.CaseNumber</td>
+                        <td>
+                            <a @onclick="@(() => EditCase(caseItem.Id))" class="btn btn-outline-dark" role="button">
+                                Edit
+                            </a>
+                            <a @onclick="@(() => DeleteConfirm(caseItem.Id))" class="btn btn-outline-danger" role="button">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else{
+                <tr>
+                    <td colspan="6" class="text-center">No Data Found..!</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Case> caseList = new();
+    private List<Case> searchCaseData = new();
+    private Case caseData = new();
+    private DateTime fromDate;
+    private DateTime toDate;
+    DateTime date = DateTime.Now;
+
+    protected override void OnInitialized()
+    {
+        GetCase();
+        fromDate = new DateTime(date.Year, date.Month, 1);
+        toDate = fromDate.AddMonths(1).AddDays(-1);
+    }
+
+    private void GetCase()
+    {
+        caseList = CaseService.ListCaseDetail();
+        searchCaseData = caseList;
+    }
+
+    private async Task OnClick(string redirectUrl)
+    {
+        var caseInfo = await DialogService.OpenAsync<AddEditCase>("Add Case",null, new DialogOptions() {
+                       Resizable = true,
+                       Draggable = true,
+                       Width = "700px",
+                   });
+
+        if (caseInfo is not null)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Success",
+                Detail = "Case saved successfully."
+            });
+
+            GetCase();
+        }
+    }
+
+    private async Task EditCase(long caseId)
+    {
+        var caseInfo = await DialogService.OpenAsync<AddEditCase>("Edit Case", new Dictionary<string, object>() { { "CaseId", caseId } }, new DialogOptions()
+            {
+                Resizable = true,
+                Draggable = true,
+                Width = "700px",
+            });
+
+        if (caseInfo is not null)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Success",
+                Detail = "Case saved successfully."
+            });
+
+            GetCase();
+        }
+    }
+
+    private async Task PrintCaseList()
+    {
+        await Js.InvokeVoidAsync("printTable", "case-table");
+    }
+
+    protected void FilterCases()
+    {
+        caseList = searchCaseData
+            .Where(x => x.HearingDate.Date >= fromDate && x.HearingDate.Date <= toDate)
+            .ToList();
+    }
+
+    protected async Task DeleteConfirm(long caseId)
+    {
+        bool? isConfirmed = await DialogService.Confirm("Are you sure you want to delete case?", "Remove Case", new ConfirmOptions
+            { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (isConfirmed != null && isConfirmed.Value == true)
+        {
+            bool isDeleted = CaseService.RemoveCaseDetail(caseId);
+
+            if (isDeleted)
+            {
+                NotificationService.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Success",
+                    Detail = "Case Deleted successfully."
+                });
+
+                GetCase();
+            }
+        }
+    }
+}

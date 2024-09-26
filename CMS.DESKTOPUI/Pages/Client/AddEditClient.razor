@@ -1,0 +1,222 @@
+﻿@page "/client/add"
+@page "/client/edit/{clientId:long}"
+
+@using CMS.Data.ContextModels;
+@using CMS.Data.FormModels;
+@using CMS.Repository.Interface;
+@using CMS.Services;
+@using CMS.Services.Interface;
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@using Radzen
+@using Radzen.Blazor
+
+@inject IClientService ClientService
+@inject NavigationManager NavigationManager
+@inject IUserRepository UserRepository
+@inject ProtectedSessionStorage Session
+@inject DialogService DialogService
+
+<RadzenColumn SizeMD="12">
+    <RadzenTemplateForm TItem="ClientFM" Data="@clientFM" Submit=@OnValidSubmit>
+        <RadzenStack>
+            <RadzenRow>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Name" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@clientFM.User.Name" Name="Name" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Text="Name is required" Component="Name" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Email" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@clientFM.User.Email" Name="Email" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Text="Email is required" Component="Email" />
+                            <RadzenEmailValidator Text="Please enter valid email" Component="Email" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="City" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@clientFM.User.City" Name="City" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Text="City is required" Component="City" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="State" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@clientFM.State" Name="State" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Text="State is required" Component="State" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Aadhar Number" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@clientFM.AadharNumber" Name="AadharNumber" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Text="Aadhar Number is required" Component="AadharNumber" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Pan Card Number" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@clientFM.PanCardNumber" Name="PanCardNumber" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Text="Pan card number is required" Component="PanCardNumber" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Mobile Number" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@clientFM.User.MobileNo" Name="MobileNo" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Text="Mobile Number is required" Component="MobileNo" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Voting Id" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@clientFM.VotingId" Name="VotingId" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Text="Voting id is required" Component="VotingId" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="User name" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@clientFM.User.Username" Name="Username" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Text="User name is required" Component="Username" />
+                        </Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="6">
+                    <RadzenFormField Text="Password" Variant="@Variant.Outlined">
+                        <ChildContent>
+                            <RadzenTextBox @bind-Value="@clientFM.User.Password" Name="Password" />
+                        </ChildContent>
+                        <Helper><RadzenRequiredValidator Text="Password is required" Component="Password" /></Helper>
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenFormField Text="Address" Variant="@Variant.Outlined">
+                <ChildContent><RadzenTextArea @bind-Value="@clientFM.User.Address" Name="Address" /></ChildContent>
+                <Helper><RadzenRequiredValidator Text="Address is required" Component="Address" /></Helper>
+            </RadzenFormField>
+
+            <RadzenFormField Text="Gender" Variant="@Variant.Outlined">
+                <ChildContent>
+                    <RadzenRadioButtonList @bind-Value=@clientFM.User.Gender TValue="string" Style="padding:10px;">
+                        <Items>
+                            @foreach (string gender in genderList)
+                            {
+                                <RadzenRadioButtonListItem Text="@gender" Value="gender" />
+                            }
+                        </Items>
+                    </RadzenRadioButtonList>
+                </ChildContent>
+                <Helper><ValidationMessage For="@(() => clientFM.User.Gender)" /></Helper>
+            </RadzenFormField>
+        </RadzenStack>
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Style="margin-top:10px;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+            <RadzenButton ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Text="Save" Icon="save" Disabled="loading" Variant="Variant.Filled">
+                <RadzenProgressBarCircular ProgressBarStyle="ProgressBarStyle.Primary" Visible="@loading" /> Save
+            </RadzenButton>
+            <RadzenButton ButtonStyle="ButtonStyle.Light" Shade="Shade.Lighter" Text="Close" Click="@(() => NavigationManager.NavigateTo("client/clientlist"))" />
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenColumn>
+
+@code {
+
+    [Parameter]
+    public long clientId { get; set; }
+
+    private User user = new User();
+    private string title = string.Empty;
+    private ClientFM clientFM = new ClientFM();
+    private Client clientData = new Client();
+    private bool loading;
+    private List<string> genderList = new List<string>() { "Male", "Female", "Other" };
+    ProtectedBrowserStorageResult<string> userName = new ProtectedBrowserStorageResult<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (clientId > 0)
+        {
+            clientFM = ClientService.GetClientById(clientId);
+        }
+        else
+        {
+            clientFM.User = new User();
+            userName = await Session.GetAsync<string>("User");
+            user = UserRepository.GetLoggedInUser(userName.Value);
+        }
+
+        base.OnInitialized();
+    }
+
+    private async Task OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            await Task.Delay(200);   
+            clientFM.User.Role = "Client";
+            clientFM.User.CreatedBy = user.Username;
+            if (clientFM.Id > 0)
+            {
+                var userInfo = ClientService.UpdateClient(clientFM.Id);
+                DialogService.Close(userInfo);
+            }
+            else
+            {
+                var userInfo = ClientService.CreateClient(clientFM);
+                DialogService.Close(userInfo);
+            }
+        }
+        catch (Exception ex)
+        {
+            loading = false;
+            StateHasChanged();
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

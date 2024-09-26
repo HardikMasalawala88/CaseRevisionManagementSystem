@@ -1,0 +1,90 @@
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using System.Security.Claims;
+@using Radzen;
+
+@inject ProtectedSessionStorage Session
+@inject NavigationManager NavigationManager
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">CRMS</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        <AuthorizeView Roles="Lawyer">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="user/dashboard">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> Dashboard
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="client/clientlist">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> Clients
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="case/caselist">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> Case
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="user/profile">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> My Profile
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+        <AuthorizeView Roles="Client">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" @onclick="@(() => OpenClientCase())">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> Cases
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="client/lawyerList">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> Collaborative Lawyers
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="user/profile">
+                        <span class="oi oi-list-rich" aria-hidden="true"></span> My Profile
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </nav>
+</div>
+
+@code {
+
+    //ProtectedBrowserStorageResult<string> userData = new ProtectedBrowserStorageResult<string>();
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private bool collapseNavMenu = true;
+    private long userId;
+
+    private async Task ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+        var user = await Session.GetAsync<string>("User");
+    }
+
+    private async Task OpenClientCase()
+    {
+        var userSessionId = await Session.GetAsync<long>("UserId");
+        userId = userSessionId.Value > 0 ? userSessionId.Value : 0;
+
+        NavigationManager.NavigateTo($"case/clientcases/{userId}");
+    }
+}

@@ -1,0 +1,173 @@
+﻿@page "/account/register"
+
+@inject IAccountService AccountService
+@inject ILawyerService LawyerService
+@inject NavigationManager NavigationManager
+
+@using CMS.Data.ContextModels
+@using CMS.Data.FormModels
+@using CMS.Services.Interface
+
+<PageTitle>Register</PageTitle>
+
+
+<div class="card" style="width:50%;align-content:center;">
+    <h4 class="card-header">Register</h4>
+    <div class="card-body">
+        <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <div class="form-row col-12 my-3">
+                            <label>Name: </label>
+                            <InputText @bind-Value="model.Name" class="form-control" />
+                            <ValidationMessage For="@(() => model.Name)" />
+                        </div>
+                        <div class="form-group col-12 mt-2">
+                            <label>Email: </label>
+                            <InputText @bind-Value="model.Email" class="form-control" />
+                            <ValidationMessage For="@(() => model.Email)" />
+                        </div>
+                        <div class="form-group col-12 mt-2">
+                            <label>Address: </label>
+                            <InputTextArea @bind-Value="model.Address" class="form-control" />
+                            <ValidationMessage For="@(() => model.Address)" />
+                        </div>
+                        <div class="form-group col-12">
+                            <label>City: </label>
+                            <InputText @bind-Value="model.City" class="form-control" />
+                            <ValidationMessage For="@(() => model.City)" />
+                        </div>
+                        <div class="form-group col-12 mt-2">
+                            <label>MobileNo: </label>
+                            <InputText @bind-Value="model.MobileNo" class="form-control" />
+                            <ValidationMessage For="@(() => model.MobileNo)" />
+                        </div>
+                        <div class="form-group col-12">
+                            <label>Username: </label>
+                            <InputText @bind-Value="model.Username" class="form-control" />
+                            <ValidationMessage For="@(() => model.Username)" />
+                        </div>
+                        <div class="form-group col-12">
+                            <label>Password: </label>
+                            <input type="password" @bind-value="model.Password" class="form-control" />
+                            <ValidationMessage For="@(() => model.Password)" />
+                        </div>
+                        <div class="form-group col-12">
+                            <label>Gender: </label>
+                            <InputRadioGroup @bind-Value="model.Gender" class="form-control mx-2">
+                                @foreach (string gender in genderList)
+                                {
+                                    <InputRadio Value="@gender" class="mx-2" /> @gender
+                                }
+                            </InputRadioGroup>
+                            <ValidationMessage For="@(() => model.Gender)" />
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-row col-12">
+                            <div class="form-row col-12 my-3">
+                                <label>AadharCard Number: </label>
+                                <InputText @bind-Value="model.LawyerFM.AadharNumber" class="form-control" />
+                                <ValidationMessage For="@(() => model.LawyerFM.AadharNumber)" />
+                            </div>
+                        </div>
+                        <div class="form-row col-12">
+                            <div class="form-row col-12 my-3">
+                                <label>PanCard Number: </label>
+                                <InputText @bind-Value="model.LawyerFM.PanCardNumber" class="form-control" />
+                                <ValidationMessage For="@(() => model.LawyerFM.PanCardNumber)" />
+                            </div>
+                        </div>
+                        <div class="form-row col-12">
+                            <div class="form-row col-12 my-3">
+                                <label>Specialization: </label>
+                                <InputSelect class="form-control" @bind-Value="model.LawyerFM.Specialization">
+                                    <option>Select Specialization</option>
+                                    @foreach (var item in specializations)
+                                    {
+                                        <option value="@item">@item</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => model.LawyerFM.Specialization)" />
+                            </div>
+                        </div>
+                        <div class="form-row col-12">
+                            <div class="form-row col-12 my-3">
+                                <label>Licence Number: </label>
+                                <InputText @bind-Value="model.LawyerFM.Lawyer_uniqueNumber" class="form-control" />
+                                <ValidationMessage For="@(() => model.LawyerFM.Lawyer_uniqueNumber)" />
+                            </div>
+                        </div>
+                        <div class="form-row col-12">
+                            <div class="form-row col-12 my-3">
+                                <label>Voting Id: </label>
+                                <InputText @bind-Value="model.LawyerFM.VotingId" class="form-control" />
+                                <ValidationMessage For="@(() => model.LawyerFM.VotingId)" />
+                            </div>
+                        </div>
+                        <div class="form-row col-12">
+                            <div class="form-row col-12 my-3">
+                                <label>DateOfBirth: </label>
+                                <InputDate @bind-Value="model.LawyerFM.DateOfBirth" class="form-control" />
+                                <ValidationMessage For="@(() => model.LawyerFM.DateOfBirth)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group col-12 my-2">
+                <button type="submit" disabled="@loading" class="btn btn-primary">
+                    @if (loading)
+                    {
+                        <span class="spinner-border spinner-border-sm mr-1"></span>
+                    }
+                    Save
+                </button>
+            </div>
+
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private User user = new User();
+    private RegisterFM model = new RegisterFM();
+    private LawyerFM lawyerData = new LawyerFM();
+    private List<string> specializations = new List<string>();
+    private bool loading;
+    private List<string> genderList = new List<string>() { "Male", "Female", "Other" };
+
+    protected override void OnInitialized()
+    {
+        model.LawyerFM = new LawyerFM();
+        specializations.Add(Specialization.Civil.ToString());
+        specializations.Add(Specialization.Criminal.ToString());
+        specializations.Add(Specialization.ConsumerProtectionAct.ToString());
+        specializations.Add(Specialization.Revenue.ToString());
+        specializations.Add(Specialization.LabourContractAct.ToString());
+        base.OnInitialized();
+    }
+
+    private void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            var userInfo = AccountService.Register(model);
+            model.LawyerFM.UserId = userInfo.Id;
+            model.LawyerFM.User = userInfo;
+            lawyerData = model.LawyerFM;
+            var lawyerInfo = LawyerService.CreateOrUpdateLawyer(lawyerData);
+            NavigationManager.NavigateTo("account/login");
+        }
+        catch (Exception ex)
+        {
+            loading = false;
+            StateHasChanged();
+        }
+    }
+
+}

@@ -1,0 +1,81 @@
+﻿@using CMS.DESKTOPUI.CustomAuthentication;
+@using CMS.DESKTOPUI.Pages.Account
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@using Radzen.Blazor
+@using System.Net
+
+@inherits LayoutComponentBase
+@*@inject ProtectedSessionStorage Session*@
+
+<PageTitle>CMS.DESKTOPUI</PageTitle>
+
+<RadzenDialog/>
+<RadzenNotification/>
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+    
+    <main>
+        <div class="top-row p-4">
+            <AuthorizeView>
+                <Authorized>
+                    <a @onclick="Logout" href="javascript:viod(0)">Logout</a>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/account/login">Login</a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code{
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationStateTask { get; set; }
+
+    [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+    [Inject] public NavigationManager NavigationManager { get; set; }
+
+    private bool collapseNavMenu = true;
+    //private bool isAuthenticated = false;
+    //private CustomAuthStateProvider customAuthStateProvider = new CustomAuthStateProvider();
+
+    //protected override async Task OnParametersSetAsync()
+    //{
+    //    await base.OnInitializedAsync();
+    //    AuthenticationState authState = await customAuthStateProvider.GetAuthenticationStateAsync();
+    //    AuthenticationState authState1 = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+    //    if (AuthenticationStateTask is not null)
+    //    {
+    //        var auth = AuthenticationStateTask.Result;
+    //    }
+
+    //    if (authState.User.Identity is { IsAuthenticated: false })
+    //    {
+    //        isAuthenticated = false;
+    //    }
+    //    else
+    //    {
+    //        string nameIdentifier = authState.User.Identity.Name;
+    //        if (!string.IsNullOrEmpty(nameIdentifier))
+    //        {
+    //            isAuthenticated = true;
+    //            string userId = string.Empty;
+    //            var userIdClaim = authState.User.Claims.Where(c => c.Type == "UserId").FirstOrDefault();
+    //        }
+    //    }
+    //}
+
+    private async Task Logout()
+    {
+        var customAuthStateProvider = (CustomAuthStateProvider)AuthenticationStateProvider;
+        await customAuthStateProvider.UpdateAuthneticationState(null);
+        NavigationManager.NavigateTo("/", true);
+    }
+}

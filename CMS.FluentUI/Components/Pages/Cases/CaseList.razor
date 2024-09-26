@@ -1,0 +1,75 @@
+﻿@page "/case/caselist"
+@attribute [Authorize(Roles = "Lawyer, Client")]
+
+<h3>Case List</h3>
+
+<div class="row my-2">
+    <div class="col-4">
+        <FluentButton OnClick=@(args => OnClick("/case/add")) Appearance="Appearance.Accent" IconStart="@(new Icons.Regular.Size16.Add())">Add Case</FluentButton>
+    </div>
+    <div class="col-8">
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="@Horizontal" HorizontalGap="1" Wrap="true">
+            <FluentLabel>From Date:</FluentLabel><FluentDatePicker Value="@fromDate" ValueChanged="@(e => fromDate = e.Value)" />
+            <FluentLabel>To Date:</FluentLabel><FluentDatePicker Value="@toDate" ValueChanged="@(e => toDate = e.Value)" />
+
+            <FluentButton OnClick="@(args => FilterCases())" Appearance="Appearance.Accent">Search</FluentButton>
+        </FluentStack>
+    </div>
+</div>
+
+@if (caseList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="d-flex justify-content-end">
+        <FluentButton OnClick="@(async args => await PrintCaseList())" Appearance="Appearance.Accent">Print</FluentButton>
+    </div>
+
+    <table id="tblcase" class="table table-striped align-middle table-bordered mt-5 table-to-print">
+        <thead class="table-success">
+            <tr>
+                <th>ClientName</th>
+                <th>CaseTitle</th>
+                <th>CaseDetail</th>
+                <th>HearingDate</th>
+                <th>CourtLocation</th>
+                <th>CaseNumber</th>
+                @if (caseList.Any())
+                {
+                    <th>Action</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (caseList.Count() > 0)
+            {
+                foreach (var caseItem in caseList)
+                {
+                    <tr>
+                        <td>@(caseItem.Client != null ? caseItem.Client.User.Name : string.Empty)</td>
+                        <td>@caseItem.CaseTitle</td>
+                        <td>@caseItem.CaseDetail</td>
+                        <td>@caseItem.HearingDate</td>
+                        <td>@caseItem.CourtLocation</td>
+                        <td>@caseItem.CaseNumber</td>
+                        <td>
+                            <a href='/case/edit/@caseItem.Id' class="btn btn-outline-dark" role="button">
+                                Edit
+                            </a>
+                            <a href='#' @onclick="@(() => DeleteConfirm(caseItem.Id))" class="btn btn-outline-danger" role="button">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else{
+                <tr>
+                    <td colspan="6" class="text-center">No Data Found..!</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

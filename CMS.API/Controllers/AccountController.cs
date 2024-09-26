@@ -2,6 +2,7 @@
 using CMS.Data.ContextModels;
 using CMS.Data.FormModels;
 using CMS.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +27,7 @@ namespace CMS.API.Controllers
         private readonly IUserService _userService;
         private readonly IConfiguration _config;
         private ApplicationContext _context;
+
         public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager, ILogger<AccountController> logger, IUserService userService, ApplicationContext context, IConfiguration config)
         {
             _userManager = userManager;
@@ -37,8 +39,10 @@ namespace CMS.API.Controllers
             _context = context;
             _config = config;
         }
+
         [HttpPost]
         [Route("[action]")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterFM registerModel)
         {
             var userExists = await _userManager.FindByNameAsync(registerModel.Username);

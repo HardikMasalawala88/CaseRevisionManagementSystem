@@ -1,0 +1,193 @@
+﻿@page "/client/clientlist"
+
+@using CMS.Data.ContextModels;
+@using CMS.Services.Interface;
+@using Radzen
+@using Radzen.Blazor
+
+@inject IClientService ClientService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+
+<h3>Client List</h3>
+
+<div class="row mt-3">
+    <div class="col-md-12 d-flex justify-content-end">
+        <RadzenButton Click="@(() => AddClientData())" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Medium" Icon="add" Text="Add client" />
+    </div>
+</div>
+
+@if (clientList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+     <div class="row col-12 d-flex justify-content-start">
+        <div class="col-4 pe-1">
+            <input type="text" class="form-control" placeholder="Search client" @bind="SearchString" @bind:event="oninput" @onkeyup="FilterClient" />
+        </div>
+        @if (SearchString.Length > 0)
+        {
+            <div class="col-1 p-0">
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Click="ResetSearch" Icon="close" />
+            </div>
+        }
+     </div>
+
+    <table class="table table-striped align-middle table-bordered mt-5">
+        <thead class="table-success">
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Mobile number</th>
+                <th>Aadhar Number</th>
+                <th>PanCard Number</th>
+                <th>Voting Id</th>
+                @if (clientList.Any())
+                {
+                    <th>Action</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (clientList.Count() > 0)
+            {
+                foreach (var clientData in clientList)
+                {
+                    <tr>
+                        <td>@clientData.User.Name</td>
+                        <td>@clientData.User.Email</td>
+                        <td>@clientData.User.Address</td>
+                        <td>@clientData.User.MobileNo</td>
+                        <td>@clientData.AadharNumber</td>
+                        <td>@clientData.PanCardNumber</td>
+                        <td>@clientData.VotingId</td>
+                        <td>
+                            <a @onclick="@(() => EditClient(clientData.Id))" class="btn btn-outline-dark" role="button">
+                                Edit
+                            </a>
+                            <a @onclick="@(() => DeleteConfirm(clientData.Id))" class="btn btn-outline-danger" role="button">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-center">No Data Found..!</td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+}
+
+@code {
+    private List<Client> clientList = new();
+    private List<Client> searchClientData = new();
+    private Client clientData = new();
+    private string SearchString { get; set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        GetClients();
+    }
+
+    private void GetClients()
+    {
+        clientList = ClientService.ListClientData().ToList();
+        searchClientData = clientList;
+    }
+
+    protected void FilterClient()
+    {
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            clientList = searchClientData
+                .Where(x => x.User.Name.IndexOf(SearchString, StringComparison.OrdinalIgnoreCase) != -1)
+                .ToList();
+        }
+        else
+        {
+            clientList = searchClientData;
+        }
+    }
+
+    private async Task AddClientData()
+    {
+        var clientInfo = await DialogService.OpenAsync<AddEditClient>("Add Client", null, new DialogOptions()
+            {
+                Resizable = true,
+                Draggable = true,
+                Width = "700px",
+            });
+
+        if (clientInfo is not null)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Success",
+                Detail = "Client saved successfully."
+            });
+
+            GetClients();
+        }
+    }
+
+    private async Task EditClient(long clientId)
+    {
+        var clientInfo = await DialogService.OpenAsync<AddEditClient>("Edit Client", new Dictionary<string, object>() { { "ClientId", clientId } }, new DialogOptions()
+            {
+                Resizable = true,
+                Draggable = true,
+                Width = "700px",
+            });
+
+        if (clientInfo is not null)
+        {
+            NotificationService.Notify(new NotificationMessage
+            {
+                Severity = NotificationSeverity.Success,
+                Summary = "Success",
+                Detail = "Client saved successfully."
+            });
+
+            GetClients();
+        }
+    }
+
+    protected async Task DeleteConfirm(long clientId)
+    {
+        bool? isConfirmed = await DialogService.Confirm("Are you sure you want to delete client?", "Remove Client", new ConfirmOptions
+        { OkButtonText = "Yes", CancelButtonText = "No" });
+
+        if (isConfirmed != null && isConfirmed.Value == true)
+        {
+            bool isDeleted = ClientService.RemoveClient(clientId);
+
+            if (isDeleted)
+            {
+                NotificationService.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Success,
+                        Summary = "Success",
+                        Detail = "Client Deleted successfully."
+                    });
+
+                GetClients();
+            }
+        }
+        
+    }
+
+    public void ResetSearch()
+    {
+        SearchString = string.Empty;
+        clientList = searchClientData;
+    }
+}

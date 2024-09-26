@@ -1,0 +1,84 @@
+﻿@page "/account/login"
+
+@using CMS.DESKTOPUI.CustomAuthentication;
+@using CMS.DESKTOPUI.CustomAuthentications;
+@using CMS.Data.FormModels
+@using CMS.Services.Interface
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using System.Security.Claims;
+
+@inject NavigationManager NavigationManager
+@inject IAccountService AccountService
+@inject ProtectedSessionStorage Session
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Login</PageTitle>
+
+<div class="card" style="width:50%;align-content:center;">
+    <h4 class="card-header">Login</h4>
+    <div class="card-body">
+        <EditForm Model="@loginFM" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <div class="form-group col-12 my-3">
+                <div class="form-group col-8">
+                    <label>Username</label>
+                    <InputText @bind-Value="loginFM.Username" class="form-control" />
+                    <ValidationMessage For="@(() => loginFM.Username)" />
+                </div>
+            </div>
+            <div class="form-group col-12 my-3">
+                <div class="form-group col-8">
+                    <label>Password</label>
+                    <InputText @bind-Value="loginFM.Password" type="password" class="form-control" />
+                    <ValidationMessage For="@(() => loginFM.Password)" />
+                </div>
+            </div>
+            <button type="submit" disabled="@loading" class="btn btn-primary">
+                @if (loading)
+                {
+                    <span class="spinner-border spinner-border-sm mr-1"></span>
+                }
+                Login
+            </button>
+            @*<div class="form-group text-center text-dark col-12 my-2">
+                <label>
+                    Don't Have an Account? Please <NavLink href="account/register" class="btn btn-link">Register</NavLink>
+                </label>
+            </div>*@
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginFM loginFM = new LoginFM();
+    private bool loading;
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            var loggedInUser = AccountService.Login(loginFM);
+            var customAuthStateProvider = (CustomAuthStateProvider)AuthenticationStateProvider;
+
+            if (loggedInUser is not null)
+            {
+                await customAuthStateProvider.UpdateAuthneticationState(new UserSession
+                    {
+                        Username = loggedInUser.Username,
+                        Role = loggedInUser.Role
+                    });
+
+                await Session.SetAsync("User", loggedInUser.Username);
+                await Session.SetAsync("UserId", loggedInUser.Id);
+            }
+
+            NavigationManager.NavigateTo("/", true);
+        }
+        catch (Exception ex)
+        {
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}

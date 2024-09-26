@@ -3,9 +3,6 @@ using CMS.Repository.Interface;
 using CMS.Repository.Repository;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CMS.Repository
 {
@@ -16,6 +13,7 @@ namespace CMS.Repository
         {
             _clientRepository = clientRepository;
         }
+
         public void DeleteClient(long id)
         {
             Client client = GetClient(id);

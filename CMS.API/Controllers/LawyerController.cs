@@ -42,7 +42,7 @@ namespace CMS.API.Controllers
         {
             var loggedInUser = HttpContext.Session.GetString("UserId");
             clientFM.User.CreatedBy = loggedInUser;
-            var clientData = _clientService.CreateOrUpdateClient(clientFM);
+            var clientData = _clientService.CreateClient(clientFM);
             if (clientData != null)
             {
                 return Ok(new Response { Status = "Success", Message = "Client Added Successfully...!" });
@@ -63,7 +63,7 @@ namespace CMS.API.Controllers
         {
             var loggedInUser = HttpContext.Session.GetString("UserId");
             clientForm.User.ModifiedBy = loggedInUser;
-            var clientUpdatedData = _clientService.CreateOrUpdateClient(clientForm);
+            var clientUpdatedData = _clientService.UpdateClient(clientForm.Id);
             if (clientUpdatedData != null)
             {
                 return Ok(new Response { Status = "Success", Message = "Client Data Updated Successfully...!" });

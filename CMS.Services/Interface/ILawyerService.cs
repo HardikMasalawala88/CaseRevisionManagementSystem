@@ -13,6 +13,7 @@ namespace CMS.Services.Interface
         LawyerFM CreateOrUpdateLawyer(LawyerFM lawyer);
         IEnumerable<Lawyer> ListLawyerData();
         Lawyer GetLawyerData(long lawyerId);
+        Lawyer GetLawyerDataByUserId(long userId);
         bool RemoveLawyerData(long lawyerId);
     }
 }

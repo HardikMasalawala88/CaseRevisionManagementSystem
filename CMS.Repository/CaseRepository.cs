@@ -3,18 +3,17 @@ using CMS.Repository.Interface;
 using CMS.Repository.Repository;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CMS.Repository
 {
     public class CaseRepository : ICaseRepository
     {
         private readonly IRepository<Case> _caseRepository;
-        public CaseRepository(IRepository<Case> caseRepository)
+        private readonly IRepository<CaseDocument> _caseDocumentRepository;
+        public CaseRepository(IRepository<Case> caseRepository, IRepository<CaseDocument> caseDocumentRepository)
         {
             _caseRepository = caseRepository;
+            _caseDocumentRepository = caseDocumentRepository;
         }
 
         public void DeleteCase(long id)
@@ -42,7 +41,7 @@ namespace CMS.Repository
             Case caseDetail = _caseRepository.Insert(caseData);
             return caseDetail;
         }
-
+        
         public void UpdateCase(Case caseData)
         {
             _caseRepository.Update(caseData);

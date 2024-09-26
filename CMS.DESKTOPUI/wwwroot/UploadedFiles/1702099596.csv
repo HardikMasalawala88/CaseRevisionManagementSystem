@@ -1,0 +1,4 @@
+Company Name,Owner,Organization,CompanySize,PhoneNumber,Email address,Fax,Website,LinkedIn,Facebook,Twitter,StripeCustomerId,SubscriptionStatus,CompanyStatus,CompanySourceId,SalesRep
+Test-comp1,belishdev1@gmail.com,1,10,8866994411,Test-comp1@yopmail.com,,www.testsite1.com,LinkedIn1,Facebook1,Twitter1,StripeCustomerId-1,active,Subscribed,Google,belishdev1@gmail.com
+Test-comp2,belishdev1@gmail.com,2,11,8866994412,Test-comp2@yopmail.com,,www.testsite2.com,LinkedIn2,Facebook2,Twitter2,StripeCustomerId-2,active,Subscribed,Google,belishdev1@gmail.com
+Test-comp2,,,25,,Test-comp1@yopmail.com,,,,,,,penDing,,Test,

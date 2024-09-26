@@ -1,10 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CMS.Data.ContextModels
 {
@@ -24,10 +19,12 @@ namespace CMS.Data.ContextModels
                       .WithMany(x => x.Cases)
                       .OnDelete(DeleteBehavior.Restrict));
         }
+
         public DbSet<User> UserData { get; set; }
         public DbSet<Lawyer> Lawyers { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<Case> Cases { get; set; }
+        public DbSet<CaseDocument> CaseDocuments { get; set; }
         public DbSet<ApplicationUser> ApplicationUser { get; set; }
     }
 }

@@ -5,8 +5,6 @@ using CMS.Services.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CMS.Services
 {
@@ -31,7 +29,7 @@ namespace CMS.Services
                     User user = new User();
                     user.Id = userDetails.Id;
                     user.Name = userDetails.Name;
-                    user.EmailId = userDetails.EmailId;
+                    user.Email = userDetails.Email;
                     user.Gender = userDetails.Gender;
                     user.Address = userDetails.Address;
                     user.City = userDetails.City;
@@ -47,7 +45,7 @@ namespace CMS.Services
                 {
                     User user = new User();
                     user.Name = userFM.Name;
-                    user.EmailId = userFM.EmailId;
+                    user.Email = userFM.EmailId;
                     user.Gender = userFM.Gender;
                     user.Address = userFM.Address;
                     user.City = userFM.City;
@@ -72,6 +70,12 @@ namespace CMS.Services
         {
             User userInfo = _userRepository.GetUsers().Where(x => x.Username == loginUser.Username &&
                                                     x.Password == loginUser.Password).FirstOrDefault();
+            return userInfo;
+        }
+        
+        public User GetUserById(long userId)
+        {
+            User userInfo = _userRepository.GetUsers().FirstOrDefault(x => x.Id == userId && !x.IsDelete);
             return userInfo;
         }
 

@@ -1,0 +1,132 @@
+﻿@using CMS.Data.ContextModels;
+@using CMS.Data.FormModels;
+@using CMS.Repository.Interface;
+@using CMS.Services.Interface;
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@using Radzen;
+@using Radzen.Blazor
+
+@inject ICaseService CaseService
+@inject IClientService ClientService
+@inject ILawyerService LawyerService
+@inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage Session
+@inject IUserRepository UserRepository
+@inject DialogService DialogService
+
+<RadzenTemplateForm TItem="CaseFM" Data="@model" Submit=@OnSubmit>
+    <div class="row" style="margin-bottom: 16px">
+        <div class="col-md-3">
+            <RadzenLabel Text="CaseTitle" />
+        </div>
+        <div class="col">
+            <RadzenTextBox @bind-Value="@model.CaseTitle" Name="CaseTitle" />
+            <RadzenRequiredValidator Text="CaseTitle is required" Component="CaseTitle" />
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 16px">
+        <div class="col-md-3">
+            <RadzenLabel Text="SelectClient" />
+        </div>
+        <div class="col">
+            <RadzenDropDown TValue="string" @bind-Value="selectedClient" Name="ClientName" Data="@clients" Change="@OnChange" />
+            <RadzenRequiredValidator Text="Client is required" Component="ClientName" />
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 16px">
+        <div class="col-md-3">
+            <RadzenLabel Text="CaseDetail" />
+        </div>
+        <div class="col">
+            <RadzenTextBox @bind-Value="@model.CaseDetail" Name="CaseDetail" />
+            <RadzenRequiredValidator Text="CaseDetail is required" Component="CaseDetail" />
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 16px">
+        <div class="col-md-3">
+            <RadzenLabel Text="HearingDate" />
+        </div>
+        <div class="col">
+            <RadzenDatePicker @bind-Value="@model.HearingDate" Name="HearingDate" ShowTime="true" />
+            <RadzenRequiredValidator Text="HearingDate is required" Component="HearingDate" />
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 16px">
+        <div class="col-md-3">
+            <RadzenLabel Text="CourtLocation" />
+        </div>
+        <div class="col">
+            <RadzenTextBox @bind-Value="@model.CourtLocation" Name="CourtLocation" />
+            <RadzenRequiredValidator Text="CourtLocation is required" Component="CourtLocation" />
+        </div>
+    </div>
+    <div class="row" style="margin-bottom: 16px">
+        <div class="col-md-3">
+            <RadzenLabel Text="CaseNumber" />
+        </div>
+        <div class="col">
+            <RadzenTextBox @bind-Value="@model.CaseNumber" Name="CaseNumber" />
+            <RadzenRequiredValidator Text="CaseNumber is required" Component="CaseNumber" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Save" />
+        </div>
+    </div>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter]
+    public DateTime HearingDate { get; set; }
+
+    private User userData = new User();
+    private string selectedClient = string.Empty;
+    private Lawyer lawyerData = new Lawyer();
+    private List<Client> clientData = new List<Client>();
+    private Client clientInfo = new Client();
+    private List<string> clients = new List<string>();
+    ProtectedBrowserStorageResult<string> userName = new ProtectedBrowserStorageResult<string>();
+    CaseFM model = new CaseFM();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            userName = await Session.GetAsync<string>("User");
+            userData = UserRepository.GetLoggedInUser(userName.Value);
+            lawyerData = LawyerService.GetLawyerDataByUserId(userData.Id);
+            clientData = ClientService.GetClientsUsingLawyerId(userName.Value);
+            clients = clientData.Select(x => x.User.Email).Distinct().ToList();
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        model.HearingDate = HearingDate;
+    }
+
+    private void OnChange(object clientEmail)
+    {
+        clientInfo = ClientService.GetClientUsingEmail(clientEmail.ToString());
+    }
+
+    public void OnSubmit(CaseFM model)
+    {
+        DialogService.Close(model);
+        model.Client = clientInfo;
+        model.Lawyer = lawyerData;
+        model.ClientId = clientInfo.Id;
+        model.LawyerId = lawyerData.Id;
+        model.CaseParentId = 10254;
+        var caseData = CaseService.CreateOrUpdateCase(model);
+        NavigationManager.NavigateTo("case/caselist");
+    }
+}

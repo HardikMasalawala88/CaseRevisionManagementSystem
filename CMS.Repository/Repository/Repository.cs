@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CMS.Repository.Repository
 {
@@ -38,6 +36,12 @@ namespace CMS.Repository.Repository
         {
             return entities.SingleOrDefault(s => s.Id == id);
         }
+        
+        public User GetByUsername(string userName)
+        {
+            var userData = _context.UserData.FirstOrDefault(x => x.Username.Equals(userName));
+            return userData;
+        }
 
         public T Insert(T entity)
         {
@@ -45,6 +49,7 @@ namespace CMS.Repository.Repository
             {
                 throw new ArgumentNullException("entity");
             }
+
             entities.Add(entity);
             _context.SaveChanges();
             return entity;
@@ -70,6 +75,7 @@ namespace CMS.Repository.Repository
             {
                 throw new ArgumentNullException("entity");
             }
+            entities.Update(entity);
             SaveChanges();
         }
     }

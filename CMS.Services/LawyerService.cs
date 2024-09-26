@@ -2,11 +2,10 @@
 using CMS.Data.FormModels;
 using CMS.Repository.Interface;
 using CMS.Services.Interface;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CMS.Services
 {
@@ -27,12 +26,14 @@ namespace CMS.Services
         {
             try
             {
-                var lawyerDetail = _context.Lawyers.Where(x => x.Id == lawyerFM.Id).FirstOrDefault();
-                if (lawyerDetail != null)
+                var lawyerDetail = _context.Lawyers.Include(x => x.User).Where(x => x.Id == lawyerFM.Id).FirstOrDefault();
+                var userInfo = _context.UserData.FirstOrDefault(x => x.Id == lawyerFM.UserId);
+
+                if (lawyerDetail != null && userInfo is not null)
                 {
                     User user = new User();
                     user.Name = lawyerFM.User.Name;
-                    user.EmailId = lawyerFM.User.EmailId;
+                    user.Email = lawyerFM.User.Email;
                     user.MobileNo = lawyerFM.User.MobileNo;
                     user.Address = lawyerFM.User.Address;
                     user.City = lawyerFM.User.City;
@@ -54,8 +55,8 @@ namespace CMS.Services
                     lawyer.Lawyer_uniqueNumber = lawyerDetail.Lawyer_uniqueNumber;
                     lawyer.VotingId = lawyerDetail.VotingId;
                     lawyer.Specialization = lawyerDetail.Specialization; 
-                    lawyer.CaseId = lawyerDetail.CaseId;
-                    lawyer.AppointmentId = lawyerDetail.AppointmentId;
+                    //lawyer.CaseId = lawyerDetail.CaseId;
+                    //lawyer.AppointmentId = lawyerDetail.AppointmentId;
                     lawyer.ModifiedDate = DateTime.UtcNow;
                     lawyer.ModifiedBy = user.ModifiedBy;
 
@@ -63,30 +64,31 @@ namespace CMS.Services
                 }
                 else
                 {
-                    User user = new User();
-                    user.Name = lawyerFM.User.Name;
-                    user.EmailId = lawyerFM.User.EmailId;
-                    user.MobileNo = lawyerFM.User.MobileNo;
-                    user.Address = lawyerFM.User.Address;
-                    user.City = lawyerFM.User.City;
-                    user.Gender = lawyerFM.User.Gender;
-                    user.Role = lawyerFM.User.Role;
-                    user.Username = lawyerFM.User.Username;
-                    user.Password = lawyerFM.User.Password;
-                    user.CreatedBy = lawyerFM.User.CreatedBy;
-                    _userRepository.InsertUser(user);
+                    if(userInfo is null)
+                    {
+                        User user = new User();
+                        user.Name = lawyerFM.User.Name;
+                        user.Email = lawyerFM.User.Email;
+                        user.MobileNo = lawyerFM.User.MobileNo;
+                        user.Address = lawyerFM.User.Address;
+                        user.City = lawyerFM.User.City;
+                        user.Gender = lawyerFM.User.Gender;
+                        user.Role = lawyerFM.User.Role;
+                        user.Username = lawyerFM.User.Username;
+                        user.Password = lawyerFM.User.Password;
+                        user.CreatedBy = lawyerFM.User.CreatedBy;
+                        _userRepository.InsertUser(user);
+                    }
 
                     Lawyer lawyer = new Lawyer();
-                    lawyer.UserId = user.Id;
+                    lawyer.UserId = userInfo.Id;
                     lawyer.DateOfBirth = lawyerFM.DateOfBirth;
                     lawyer.AadharNumber = lawyerFM.AadharNumber;
                     lawyer.PanCardNumber = lawyerFM.PanCardNumber;
                     lawyer.Lawyer_uniqueNumber = lawyerFM.Lawyer_uniqueNumber;
                     lawyer.VotingId = lawyerFM.VotingId;
                     lawyer.Specialization = lawyerFM.Specialization.ToString(); 
-                    lawyer.CaseId = lawyerFM.CaseId;
-                    lawyer.AppointmentId = lawyerFM.AppointmentId;
-                    lawyer.CreatedBy = user.CreatedBy;
+                    lawyer.CreatedBy = userInfo.CreatedBy;
                     
                     _lawyerRepository.InsertLawyer(lawyer);
                     lawyerFM.Id = lawyer.Id;
@@ -130,6 +132,13 @@ namespace CMS.Services
             {
                 return false;
             }
+        }
+
+        public Lawyer GetLawyerDataByUserId(long userId)
+        {
+            Lawyer lawyerData = _context.Lawyers.FirstOrDefault(x => x.UserId == userId);
+
+            return lawyerData;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace CMS.API.Extension
         {
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "HMS.API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CMS.API", Version = "v1" });
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
                 {
                     Name = "Authorization",
