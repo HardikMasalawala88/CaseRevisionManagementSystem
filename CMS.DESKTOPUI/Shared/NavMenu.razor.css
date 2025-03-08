@@ -4,11 +4,18 @@
 
 .top-row {
     height: 3.5rem;
-    background-color: rgba(0,0,0,0.4);
+    background-color: white;
+    font-weight: bold;
+    justify-self: center;
 }
 
 .navbar-brand {
     font-size: 1.1rem;
+}
+
+a{
+    color: black;
+    font-weight:bold;
 }
 
 .oi {
@@ -19,35 +26,50 @@
 }
 
 .nav-item {
-    font-size: 0.9rem;
+    font-size: 0.9rem !important;
     padding-bottom: 0.5rem;
+    font-weight: 400 !important;
 }
 
-    .nav-item:first-of-type {
-        padding-top: 1rem;
-    }
+.nav-item:first-of-type {
+    padding-top: 1rem;
+}
 
-    .nav-item:last-of-type {
-        padding-bottom: 1rem;
-    }
+.nav-item:last-of-type {
+    padding-bottom: 1rem;
+}
 
-    .nav-item ::deep a {
-        color: #d7d7d7;
-        border-radius: 4px;
-        height: 3rem;
-        display: flex;
-        align-items: center;
-        line-height: 3rem;
-    }
+.nav-item ::deep a {
+    color: black;
+    border-radius: 4px;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    line-height: 3rem;
+}
+
 
 .nav-item ::deep a.active {
+    background-color: #EBF5FF !important;
+    color: #005DB8 !important;
+    border-radius: 7px !important;
+    font-weight: 600 !important;
+}
+
+.nav-item ::deep a.active span.oi {
+    color: #005DB8;
+}
+
+.nav-item ::deep a {
     background-color: rgba(255,255,255,0.25);
-    color: white;
+    color: dimgray;
 }
 
 .nav-item ::deep a:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: white;
+    font-weight: 600 !important;
+    background-color: #ffffff !important;
+    color: #718AA2 !important;
+    border-radius: 7px !important;
 }
 
 @media (min-width: 641px) {

@@ -1,20 +1,15 @@
 ﻿using AutoMapper;
 using CMS.Data.ContextModels;
 using CMS.Data.FormModels;
-using CMS.Repository;
 using CMS.Repository.Interface;
 using CMS.Services.Interface;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace CMS.Services
 {
     public class AccountService : IAccountService
     {
-        //private IHttpService _httpService;
         private NavigationManager _navigationManager;
         private readonly ApplicationContext _context;
         private readonly IUserRepository _userRepository;
@@ -31,7 +26,7 @@ namespace CMS.Services
         }
 
 
-        public void Login(LoginFM loginFM)
+        public User Login(LoginFM loginFM)
         {
             try
             {
@@ -39,16 +34,20 @@ namespace CMS.Services
                 {
                     User userData = _userRepository.GetLoggedInUser(loginFM.Username);
 
-                    if(userData is not null)
-                    {
-                        _navigationManager.NavigateTo("case/caselist");
-                    }
+                    //if(userData is not null && (userData.Role == ApplicationUserRoles.User || userData.Role == ApplicationUserRoles.Lawyer))
+                    //{
+                    //    _navigationManager.NavigateTo("user/dashboard");
+                    //}
+
+                    return userData;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
+
+            return null;
         }
 
         public User Register(RegisterFM registerFM)
@@ -58,14 +57,15 @@ namespace CMS.Services
                 User user = new User();
                 if (registerFM != null)
                 {
-                    registerFM.Role = "User";
+                    registerFM.Role = "Lawyer";
                     user = _mapper.Map<User>(registerFM);
                     user.CreatedBy = "CMS";
                 }
+
                 var userData = _userRepository.InsertUser(user);
                 return userData;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

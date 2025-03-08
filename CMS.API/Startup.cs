@@ -11,15 +11,12 @@ using CMS.Services.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 
 namespace CMS.API
 {
@@ -35,7 +32,6 @@ namespace CMS.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Inject AutoMapper
             var mapperConfig = new MapperConfiguration(mc =>
             {
                 mc.AddProfile(new MappingProfile());
@@ -44,7 +40,7 @@ namespace CMS.API
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
 
-            //services.AddControllers();
+            services.AddControllers();
             services.AddRazorPages();
             services.AddMvc();
             services.AddSession();
@@ -53,16 +49,29 @@ namespace CMS.API
             services.AddTransient<ILawyerService, LawyerService>();
             services.AddTransient<IClientService, ClientService>();
             services.AddTransient<ICaseService, CaseService>();
+            services.AddTransient<IAccountService, AccountService>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<ILawyerRepository, LawyerRepository>();
             services.AddTransient<IClientRepository, ClientRepository>();
-            services.AddTransient<IAccountService, AccountService>();
             services.AddTransient<ICaseRepository, CaseRepository>();
-            services.AddDbContext<ApplicationContext>(item => item.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddTransient<ISubscriptionService, SubscriptionService>();
+            services.AddDbContext<ApplicationContext>(options =>
+            {
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection"),
+                    sqlOptions => sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 5, // Number of retries
+                        maxRetryDelay: TimeSpan.FromSeconds(10), // Delay between retries
+                        errorNumbersToAdd: null // Specific SQL error numbers to consider transient (null for default)
+                    )
+                );
+            });
             services.IntegrateSwagger();
             services.AddSwaggerGen();
+            services.AddHttpClient();
+
             //For Identity
-            services.IdentityImplementation();            
+            services.IdentityImplementation();
 
             #region Adding Authentication
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -71,23 +80,23 @@ namespace CMS.API
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
+            });
             #endregion
 
             #region JWT bearer
-            .AddJwtBearer(options =>
-            {
-                options.SaveToken = true;
-                options.RequireHttpsMetadata = false;
-                options.TokenValidationParameters = new TokenValidationParameters()
-                {
-                    ValidIssuer = Configuration["JWT:JwtIssuer"],
-                    ValidAudience = Configuration["JWT:JwtIssuer"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:JwtKey"])),
-                    ClockSkew = TimeSpan.Zero // remove delay of token when expire
-                };
-            });
-            services.AuthorizationHandler();
+            //.AddJwtBearer(options =>
+            //{
+            //    options.SaveToken = true;
+            //    options.RequireHttpsMetadata = false;
+            //    //options.TokenValidationParameters = new TokenValidationParameters()
+            //    //{
+            //    //    ValidIssuer = Configuration["JWT:JwtIssuer"],
+            //    //    ValidAudience = Configuration["JWT:JwtIssuer"],
+            //    //    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:JwtKey"])),
+            //    //    ClockSkew = TimeSpan.Zero // remove delay of token when expire
+            //    //};
+            //});
+            //services.AuthorizationHandler();
             #endregion
         }
 
@@ -108,8 +117,6 @@ namespace CMS.API
 
             app.UseHttpsRedirection();
 
-            app.UseStaticFiles();
-
             app.UseRouting();
 
             app.UseSession();
@@ -118,10 +125,12 @@ namespace CMS.API
 
             app.UseAuthorization();
 
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapRazorPages();
-            //});
+            app.UseDeveloperExceptionPage();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

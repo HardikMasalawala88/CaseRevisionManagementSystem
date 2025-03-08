@@ -1,11 +1,14 @@
-﻿using CMS.Data.ContextModels;
+﻿using AutoMapper;
+using CMS.Data.ContextModels;
 using CMS.Data.FormModels;
+using CMS.Data.ParameterModels;
+using CMS.Data.ServiceResponse;
 using CMS.Repository.Interface;
 using CMS.Services.Interface;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CMS.Services
@@ -15,21 +18,67 @@ namespace CMS.Services
         private readonly IClientRepository _clientRepository;
         private readonly IUserRepository _userRepository;
         private readonly ApplicationContext _context;
+        private readonly IMapper _mapper;
 
-        public ClientService(IClientRepository clientRepository, ApplicationContext context, IUserRepository userRepository)
+        public ClientService(IClientRepository clientRepository, ApplicationContext context, IUserRepository userRepository, IMapper mapper)
         {
             _clientRepository = clientRepository;
             _userRepository = userRepository;
             _context = context;
+            _mapper = mapper;
         }
-        public ClientFM CreateOrUpdateClient(ClientFM clientFM)
+
+        public ClientFM CreateClient(ClientFM clientFM)
         {
             try
             {
-                var clientDetail = _context.Clients.Where(x => x.Id == clientFM.Id).FirstOrDefault();
-                if (clientDetail != null)
+                User userData = new User();
+                userData.Name = clientFM.User.Name;
+                userData.Email = clientFM.User.Email;
+                userData.MobileNo = clientFM.User.MobileNo;
+                userData.Address = clientFM.User.Address;
+                userData.City = clientFM.User.City;
+                userData.Gender = clientFM.User.Gender;
+                userData.Role = clientFM.User.Role;
+                userData.Username = clientFM.User.Username;
+                userData.Password = clientFM.User.Password;
+                userData.CreatedBy = clientFM.User.CreatedBy;
+                _userRepository.InsertUser(userData);
+
+                Client client = new Client();
+                client.UserId = userData.Id;
+                client.DateOfBirth = clientFM.DateOfBirth;
+                client.AadharNumber = clientFM.AadharNumber;
+                client.State = clientFM.State;
+                client.PanCardNumber = clientFM.PanCardNumber;
+                client.VotingId = clientFM.VotingId;
+                client.User = userData;
+                client.CreatedBy = userData.CreatedBy;
+
+                _clientRepository.InsertClient(client);
+                clientFM.Id = client.Id;
+                clientFM.UserId = client.User.Id;
+
+                return clientFM;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+        
+        public ClientFM UpdateClient(ClientFM clientFM)
+        {
+            try
+            {
+                //ClientFM clientFM = new ClientFM();
+                var clientDetail = _context.Clients.FirstOrDefault(x => x.Id == clientFM.Id);
+                var user = _context.UserData.FirstOrDefault(x => x.Id == clientDetail.UserId);
+                
+                if (clientDetail is not null && user is not null)
                 {
-                    User user = new User();
+                    _context.Entry(clientDetail).State = EntityState.Detached;
+
                     user.Name = clientFM.User.Name;
                     user.Email = clientFM.User.Email;
                     user.MobileNo = clientFM.User.MobileNo;
@@ -44,60 +93,57 @@ namespace CMS.Services
 
                     _userRepository.UpdateUser(user);
 
-                    Client client = new Client();
-                    client.Id = clientDetail.Id;
-                    client.UserId = user.Id;
-                    client.State = clientDetail.State;
-                    client.DateOfBirth = clientDetail.DateOfBirth;
-                    client.AadharNumber = clientDetail.AadharNumber;
-                    client.PanCardNumber = clientDetail.PanCardNumber;
-                    client.VotingId = clientDetail.VotingId;
-                    client.ModifiedDate = DateTime.UtcNow;
-                    client.ModifiedBy = user.ModifiedBy;
+                    //Client client = clientDetail;
+                    clientDetail.Id = clientFM.Id;
+                    clientDetail.UserId = user.Id;
+                    clientDetail.State = clientFM.State;
+                    clientDetail.DateOfBirth = clientFM.DateOfBirth;
+                    clientDetail.AadharNumber = clientDetail.AadharNumber;
+                    clientDetail.PanCardNumber = clientFM.PanCardNumber;
+                    clientDetail.VotingId = clientFM.VotingId;
+                    clientDetail.ModifiedDate = DateTime.UtcNow;
+                    clientDetail.ModifiedBy = user.ModifiedBy;
 
-                    _clientRepository.UpdateClient(client);
+                    _clientRepository.UpdateClient(clientDetail);
+
+                    clientFM = _mapper.Map<ClientFM>(clientDetail);
                 }
-                else
-                {
-                    User user = new User();
-                    user.Name = clientFM.User.Name;
-                    user.Email = clientFM.User.Email;
-                    user.MobileNo = clientFM.User.MobileNo;
-                    user.Address = clientFM.User.Address;
-                    user.City = clientFM.User.City;
-                    user.Gender = clientFM.User.Gender;
-                    user.Role = clientFM.User.Role;
-                    user.Username = clientFM.User.Username;
-                    user.Password = clientFM.User.Password;
-                    user.CreatedBy = clientFM.User.CreatedBy;
-                    _userRepository.InsertUser(user);
 
-                    Client client = new Client();
-                    client.UserId = user.Id;
-                    client.DateOfBirth = clientFM.DateOfBirth;
-                    client.AadharNumber = clientFM.AadharNumber;
-                    client.State = clientFM.State;
-                    client.PanCardNumber = clientFM.PanCardNumber;
-                    client.VotingId = clientFM.VotingId;
-                    client.CreatedBy = user.CreatedBy;
-
-                    _clientRepository.InsertClient(client);
-                    clientFM.Id = client.Id;
-                    clientFM.UserId = client.User.Id;
-                }
+                return clientFM;
             }
             catch (Exception ex)
             {
-
+                return null;
             }
-            return clientFM;
         }
 
         public IEnumerable<Client> ListClientData()
         {
-            var clientInfo = _clientRepository.GetClients().Where(x => x.IsDelete != true).ToList();
-            // lawyerInfo.User = _userRepository.GetUser(lawyerInfo.UserId);
+            var clientInfo = _clientRepository.GetClients().Where(x => !x.IsDelete).ToList();
+            clientInfo.ForEach(x => x.User = _userRepository.GetUser(x.UserId));
             return clientInfo;
+        }
+
+        public async Task<ServiceResponse<Paginate<Client>>> GetClientsAsync(GetClientsParameters getClientsParameters)
+        {
+            ServiceResponse<Paginate<Client>> response = new ServiceResponse<Paginate<Client>>();
+
+            try
+            {
+                Paginate<Client> result = new Paginate<Client>();
+                var clients = await _clientRepository.GetClientsAsync(getClientsParameters);
+                clients.Data.ForEach(x => x.User = _userRepository.GetUser(x.UserId));
+
+                result.TotalCount = clients.TotalCount;
+                result.Data = clients.Data;
+                response.Result = result;
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+            }
+
+            return response;
         }
 
         public Client GetClientData(long clientId)
@@ -105,10 +151,41 @@ namespace CMS.Services
             var clientDetail = _clientRepository.GetClient(clientId);
             return clientDetail;
         }
-        
+
+        public ClientFM GetClientById(long clientId)
+        {
+            ClientFM clientFM = new();
+            Client clientData = _context.Clients.Include(x => x.User).FirstOrDefault(x => x.Id == clientId);
+
+            clientFM.UserId = clientData.UserId;
+            clientFM.AadharNumber = clientData.AadharNumber;
+            clientFM.PanCardNumber = clientData.PanCardNumber;
+            clientFM.VotingId = clientData.VotingId;
+            clientFM.User = clientData.User;
+            clientFM.State = clientData.State;
+            clientFM.DateOfBirth = clientData.DateOfBirth;
+            clientFM.Id = clientData.Id;
+
+            return clientFM;
+        }
+
         public Client GetClientUsingUserId(long userId)
         {
             var clientDetail = _context.Clients.FirstOrDefault(x => x.UserId == userId);
+            return clientDetail;
+        }
+        
+        public List<Client> GetClientsUsingLawyerId(string userName)
+        {
+            var clientDetail = _context.Clients.Include(x => x.User)
+                                               .Where(x => x.CreatedBy.Equals(userName) && !x.IsDelete).ToList();
+            return clientDetail;
+        }
+        
+        public Client GetClientUsingEmail(string email)
+        {
+            var clientDetail = _context.Clients.Include(x => x.User)
+                                               .FirstOrDefault(x => x.User.Email.Equals(email) && !x.IsDelete);
             return clientDetail;
         }
 
@@ -116,10 +193,10 @@ namespace CMS.Services
         {
             var clientData = _clientRepository.GetClient(clientId);
             clientData.User = _userRepository.GetUser(clientData.UserId);
+            
             if (clientData != null)
             {
                 _clientRepository.DeleteClient(clientId);
-
                 _userRepository.DeleteUser(clientData.User.Id);
 
                 return true;
@@ -128,6 +205,29 @@ namespace CMS.Services
             {
                 return false;
             }
+        }
+
+        public ServiceResponse<bool> BulkDeleteClient(List<long> ids)
+        {
+            ServiceResponse<bool> response = new ServiceResponse<bool>();
+            try
+            {
+                if (!ids.Any())
+                {
+                    response.Result = false;
+                    response.Message = "Please provide clients to delete.";
+                    return response;
+                }
+
+                response.Result = _clientRepository.BulkDeleteClient(ids);
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Message = "Error while bulk deleting clients";
+            }
+
+            return response;
         }
     }
 }

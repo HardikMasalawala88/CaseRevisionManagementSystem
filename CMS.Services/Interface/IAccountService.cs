@@ -7,6 +7,6 @@ namespace CMS.Services.Interface
     public interface IAccountService
     {
         User Register(RegisterFM registerFM);
-        void Login(LoginFM loginFM);
+        User Login(LoginFM loginFM);
     }
 }

@@ -3,9 +3,6 @@ using CMS.Repository.Interface;
 using CMS.Repository.Repository;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CMS.Repository
 {
@@ -22,7 +19,6 @@ namespace CMS.Repository
             user.IsDelete = true;
             user.ModifiedDate = DateTime.UtcNow;
             user.ModifiedBy = user.CreatedBy;
-            //_userRepository.Remove(user);
             _userRepository.SaveChanges();
         }
 

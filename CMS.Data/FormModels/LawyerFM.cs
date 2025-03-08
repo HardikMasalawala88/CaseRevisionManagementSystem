@@ -1,9 +1,5 @@
 ﻿using CMS.Data.ContextModels;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CMS.Data.FormModels
 {
@@ -13,12 +9,10 @@ namespace CMS.Data.FormModels
         public long UserId { get; set; }
         public virtual User User { get; set; }
         public DateTime? DateOfBirth { get; set; } 
-        public long AadharNumber { get; set; }
-        public long PanCardNumber { get; set; }
-        public long VotingId { get; set; }
-        public long Lawyer_uniqueNumber { get; set; }
+        public string AadharNumber { get; set; }
+        public string PanCardNumber { get; set; }
+        public string VotingId { get; set; }
+        public string Lawyer_uniqueNumber { get; set; }
         public Specialization Specialization { get; set; }
-        public long CaseId { get; set; }
-        public long AppointmentId { get; set; }
     }
 }

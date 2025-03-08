@@ -1,8 +1,7 @@
 ﻿using CMS.Data.ContextModels;
-using System;
+using CMS.Data.FormModels;
+using CMS.Data.ParameterModels;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CMS.Repository.Interface
@@ -11,8 +10,10 @@ namespace CMS.Repository.Interface
     {
         IEnumerable<Client> GetClients();
         Client GetClient(long id);
+        Task<Paginate<Client>> GetClientsAsync(GetClientsParameters param);
         Client InsertClient(Client client);
         void UpdateClient(Client client);
         void DeleteClient(long id);
+        bool BulkDeleteClient(List<long> ids);
     }
 }

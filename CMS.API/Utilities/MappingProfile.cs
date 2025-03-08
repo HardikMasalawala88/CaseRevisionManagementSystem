@@ -9,6 +9,8 @@ namespace CMS.API.Utilities
         public MappingProfile()
         {
             CreateMap<RegisterFM, User>();
+            CreateMap<CaseFM, Case>().ReverseMap();
+            CreateMap<ClientFM, Client>().ReverseMap();
         }
     }
 }

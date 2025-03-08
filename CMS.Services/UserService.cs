@@ -5,8 +5,6 @@ using CMS.Services.Interface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CMS.Services
 {
@@ -28,20 +26,20 @@ namespace CMS.Services
                 var userDetails = _context.UserData.Where(x => x.Id == userFM.Id).FirstOrDefault();
                 if(userDetails != null)
                 {
-                    User user = new User();
-                    user.Id = userDetails.Id;
-                    user.Name = userDetails.Name;
-                    user.Email = userDetails.Email;
-                    user.Gender = userDetails.Gender;
-                    user.Address = userDetails.Address;
-                    user.City = userDetails.City;
-                    user.MobileNo = userDetails.MobileNo;
-                    user.Role = userDetails.Role;
-                    user.Username = userDetails.Username;
-                    user.Password = userDetails.Password;
-                    user.ModifiedBy = userDetails.Name;
-                    user.ModifiedDate = DateTime.UtcNow;
-                    _userRepository.UpdateUser(user);
+                    //User user = new User();
+                    //user.Id = userDetails.Id;
+                    userDetails.Name = userFM.Name;
+                    userDetails.Email = userFM.EmailId;
+                    userDetails.Gender = userFM.Gender;
+                    userDetails.Address = userFM.Address;
+                    userDetails.City = userFM.City;
+                    userDetails.MobileNo = userFM.MobileNo;
+                    userDetails.Role = userFM.Role;
+                    userDetails.Username = userFM.Username;
+                    userDetails.Password = userFM.Password;
+                    userDetails.ModifiedBy = userFM.Name;
+                    userDetails.ModifiedDate = DateTime.UtcNow;
+                    _userRepository.UpdateUser(userDetails);
                 }
                 else
                 {
@@ -72,6 +70,12 @@ namespace CMS.Services
         {
             User userInfo = _userRepository.GetUsers().Where(x => x.Username == loginUser.Username &&
                                                     x.Password == loginUser.Password).FirstOrDefault();
+            return userInfo;
+        }
+        
+        public User GetUserById(long userId)
+        {
+            User userInfo = _userRepository.GetUsers().FirstOrDefault(x => x.Id == userId && !x.IsDelete);
             return userInfo;
         }
 

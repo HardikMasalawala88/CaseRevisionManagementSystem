@@ -1,38 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using CMS.Data.CustomValidationAttribute;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CMS.Data.FormModels
 {
     public class RegisterFM
     {
-        [Required]
+        [Required(ErrorMessage = "Name is required")]
         public string Name { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Address is required")]
         public string Address { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "City is required")]
         public string City { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Phone number is required.")]
+        [PhoneNumber(ErrorMessage = "Please enter a valid phone number in the format 9999-999-999")]
         public string MobileNo { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Gender is required")]
         public string Gender { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Username is required")]
         public string Username { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Email is required")]
         public string Email { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
 
         public string Role { get; set; }
+
+        public virtual LawyerFM LawyerFM { get; set; } = new();
     }
 }

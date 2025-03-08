@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-
-namespace CMS.Data.ContextModels
+﻿namespace CMS.Data.ContextModels
 {
     public class User : BaseEntity
     {

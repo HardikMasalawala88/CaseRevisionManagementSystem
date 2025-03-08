@@ -1,0 +1,46 @@
+﻿@rendermode InteractiveServer
+
+<div class="navmenu">
+    <input type="checkbox" title="Menu expand/collapse toggle" id="navmenu-toggle" class="navmenu-icon" />
+    <label for="navmenu-toggle" class="navmenu-icon"><FluentIcon Value="@(new Icons.Regular.Size20.Navigation())" Color="Color.Fill" /></label>
+    <nav class="sitenav" aria-labelledby="main-menu">
+        <FluentNavMenu Id="main-menu" Collapsible="true" Width="250" Title="Navigation menu" @bind-Expanded="expanded" CustomToggle="true">
+            <FluentNavLink Href="/" Match="NavLinkMatch.All" Icon="@(new Icons.Regular.Size20.Home())" IconColor="Color.Accent">Home</FluentNavLink>
+
+            <CascadingAuthenticationState>
+                <AuthorizeView Roles="Lawyer">
+                    <Authorized>
+                        <div class="nav-item px-3">
+                            <FluentNavLink Class="nav-link" Href="user/dashboard">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Dashboard
+                            </FluentNavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <FluentNavLink Class="nav-link" Href="client/clientlist">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Clients
+                            </FluentNavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <FluentNavLink Class="nav-link" Href="case/caselist">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> Case
+                            </FluentNavLink>
+                        </div>
+
+                        <div class="nav-item px-3">
+                            <FluentNavLink Class="nav-link" Href="case/profile">
+                                <span class="oi oi-list-rich" aria-hidden="true"></span> My Profile
+                            </FluentNavLink>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+            </CascadingAuthenticationState>
+
+            @* <FluentNavLink Href="counter" Icon="@(new Icons.Regular.Size20.NumberSymbolSquare())" IconColor="Color.Accent">Counter</FluentNavLink>
+            <FluentNavLink Href="weather" Icon="@(new Icons.Regular.Size20.WeatherPartlyCloudyDay())" IconColor="Color.Accent">Weather</FluentNavLink> *@
+        </FluentNavMenu>
+    </nav>
+</div>
+
+@code {
+    private bool expanded = true;
+}

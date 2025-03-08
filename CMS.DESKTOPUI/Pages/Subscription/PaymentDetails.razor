@@ -1,0 +1,94 @@
+﻿@page "/subscription/paymentDetails/{userId:long}"
+
+@using CMS.DESKTOPUI.Pages.Subscription
+@using CMS.Data.ContextModels
+@using CMS.Data.Enum
+@using CMS.Data.FormModels
+@using CMS.Services
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using CMS.Services.Interface
+@using MudBlazor
+
+@inject IAccountService AccountService
+@inject IUserService UserService
+@inject TitleService TitleService
+@inject ProtectedSessionStorage Session
+@inject ISubscriptionService SubscriptionService
+@inject IDialogService DialogService
+
+<style>
+    .account-setting-heading-3 {
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 24.72px;
+        color: #041d4d;
+    }
+
+    .profile-header {
+        display: flex;
+        justify-content: space-between;
+    }
+</style>
+
+<PageTitle>Profile Details</PageTitle>
+
+<div class="main-table mt-3">
+    <MudGrid>
+        <MudItem sm="12" md="12" Class="mt-3 profile-header">
+            <MudItem Class="account-setting-heading-3">Profile Details</MudItem>
+            <MudItem Class="account-setting-heading-3 cursor-pointer" @onclick="GoBack">Back</MudItem>
+        </MudItem>
+    </MudGrid>
+    <MudDataGrid @ref="_dataGrid" T="Payment" Class="payment-table mt-7" MultiSelection="true"
+                 ServerData="@(LoadPaymentData)" SortMode="SortMode.Single" Filterable="false" Hideable="false" FooterClass="d-none"
+                 Hover="@true">
+        <Columns>
+            <SelectColumn T="Payment" />
+            <PropertyColumn CellClass="bold-cell" Property="x => x.OrderId" Sortable="true" Title="Order ID" />
+            <PropertyColumn CellClass="bold-cell" Property="x => x.Amount" Sortable="true" Title="Amount" />
+            <PropertyColumn CellClass="bold-cell" Property="x => x.Status" Sortable="true" Title="Status" />
+            <PropertyColumn CellClass="bold-cell" Property="x => x.UserId" Sortable="true" Title="User ID" />
+            <PropertyColumn CellClass="bold-cell" Property="x => x.SubscriptionPackageId" Sortable="true" Title="Package ID" />
+            <PropertyColumn CellClass="bold-cell" Property="x => x.PaymentDate" Sortable="true" Title="Payment Date" />
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="Payment" InfoFormat="Showing {first_item}-{last_item} of {all_items}" />
+        </PagerContent>
+    </MudDataGrid>
+</div>
+
+@code {
+    private MudDataGrid<Payment> _dataGrid;
+    private string sortField = "";
+    private bool preventAction = true;
+    private EnumListSortDirection sortOrder = EnumListSortDirection.Ascending;
+    [Parameter] public long userId { get; set; }
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userSessionId = await Session.GetAsync<long>("UserId");
+        userId = userSessionId.Value > 0 ? userSessionId.Value : 0;
+    }
+
+    private async Task GoBack()
+    {
+        await JSRuntime.InvokeVoidAsync("window.history.back");
+    }
+
+    private async Task<GridData<Payment>> LoadPaymentData(GridState<Payment> state)
+    {
+        GridData<Payment> gridData = new();
+        // Replace with your actual logic to fetch data
+        var payments = await SubscriptionService.GetPaymentsByUserIdAsync(userId);
+
+        gridData =  new ()
+            {
+                Items = payments,
+                TotalItems = payments.Count
+            };
+
+        return gridData;
+    }
+}

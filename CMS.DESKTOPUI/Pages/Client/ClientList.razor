@@ -1,0 +1,242 @@
+﻿@page "/client/clientlist"
+
+@using CMS.DESKTOPUI.Shared.Component
+@using CMS.DESKTOPUI.Shared.Enum
+@using CMS.Data.Enum
+@using CMS.Data.ParameterModels
+@using CMS.Services
+@using CMS.Services.Interface
+@using CMS.Data.ContextModels
+@using MudBlazor
+
+<div class="page-filter-container d-flex justify-content-between">
+    <div class="d-flex justify-content-start">
+        <MudItem Class="d-flex flex-wrap align-content-center filter-action-container">
+            <MudButton Disabled="preventAction" Class="m-2" OnClick="@(() => DeleteConfirm())" StartIcon="@Icons.Material.Filled.Delete" Variant="Variant.Filled" Size="Size.Small"> Delete </MudButton>
+        </MudItem>
+        
+    </div>
+    <div class="d-flex justify-content-end">
+        <MudItem Class="page-info-title page-info-title-1 my-5 d-flex justify-content-end px-2">
+            <MudButton Color="Color.Primary" Class="mx-1" StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" OnClick="@(() => AddClientData())">Add client</MudButton>
+        </MudItem>
+    </div>
+</div>
+
+@if (clientList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="main-table mt-3">
+        <MudDataGrid @ref="_dataGrid" T="Client" MultiSelection="true" ServerData="@(LoadGridData)"
+                     SortMode="SortMode.Single" Filterable="false" Loading="showDataGridLoader"
+                     Hideable="false" FooterClass="d-none" Hover="@true" SelectedItemsChanged="@(() => PreventAction())">
+            <Columns>
+                <SelectColumn T="Client" />
+                <PropertyColumn CellClass="bold-cell" Property="x => x.User.Name" Sortable="false" Title="Name" />
+                <PropertyColumn CellClass="bold-cell" Property="x => x.User.Email" Sortable="false" Title="Email" />
+                <PropertyColumn CellClass="bold-cell" Property="x => x.User.Address" Sortable="false" Title="Address" />
+                <PropertyColumn CellClass="bold-cell" Property="x => x.User.MobileNo" Sortable="false" Title="Mobile No" />
+                <PropertyColumn CellClass="bold-cell" Property="x => x.AadharNumber" Sortable="false" Title="Aadhar Number" />
+                <PropertyColumn CellClass="bold-cell" Property="x => x.PanCardNumber" Sortable="false" Title="PanCard Number" />
+                <PropertyColumn CellClass="bold-cell" Property="x => x.VotingId" Sortable="false" Title="Voting Id" />
+                <TemplateColumn CellClass="" Filterable="false" Title="Action" Sortable="false">
+                    <CellTemplate>
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" IconColor="Color.Secondary"
+                                 Dense="true" AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopCenter">
+                            <MudMenuItem OnClick="@(e => EditClient(@context.Item.Id))">Edit</MudMenuItem>
+                            <MudMenuItem OnClick="@(e => DeleteConfirm(@context.Item))">Delete</MudMenuItem>
+                        </MudMenu>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="Client" InfoFormat="Showing {first_item}-{last_item} of {all_items}" />
+            </PagerContent>
+        </MudDataGrid>
+    </div>
+}
+
+@code{
+    [Inject] public IClientService ClientService { get; set; }
+    [Inject] public IDialogService DialogService { get; set; }
+    [Inject] public TitleService TitleService { get; set; }
+    [Inject] public ISnackbar Snackbar { get; set; }
+
+    private List<Client> clientList = new();
+    private List<Client> searchClientData = new();
+    private bool showDataGridLoader;
+    private string SearchBarText;
+    private Client clientData = new();
+    private MudDataGrid<Client> _dataGrid;
+    private bool preventAction = true;
+    private string SearchString { get; set; } = string.Empty;
+    private string sortField = "";
+    private EnumListSortDirection sortOrder = EnumListSortDirection.Ascending;
+
+    protected override void OnInitialized()
+    {
+        TitleService.CurrentPageTitle = "Clients";
+        // GetClients();
+
+        base.OnInitialized();
+    }
+
+    private async Task<GridData<Client>> LoadGridData(GridState<Client> state)
+    {
+        GridData<Client> gridData = new();
+
+        foreach (var sortDefinition in state.SortDefinitions)
+        {
+            sortField = sortDefinition.SortBy;
+            sortOrder = sortDefinition.Descending ? EnumListSortDirection.Descending : EnumListSortDirection.Ascending;
+        }
+
+        showDataGridLoader = true;
+        var getClientsParameters = new GetClientsParameters(state.Page + 1, state.PageSize, sortField, sortOrder, SearchBarText);
+        var data = await ClientService.GetClientsAsync(getClientsParameters);
+
+        if (data != null && data.Success && data.Result != null)
+        {
+            gridData = new()
+                {
+                    Items = data.Result.Data,
+                    TotalItems = data.Result.TotalCount
+                };
+        }
+        else
+        {
+            Snackbar.Add("Error while getting clients.", Severity.Error);
+        }
+
+        showDataGridLoader = false;
+        return gridData;
+    }
+
+    // private void GetClients()
+    // {
+    //     clientList = ClientService.ListClientData().ToList();
+    //     searchClientData = clientList;
+    // }
+
+    protected void FilterClient()
+    {
+        if (!string.IsNullOrEmpty(SearchString))
+        {
+            clientList = searchClientData
+                .Where(x => x.User.Name.IndexOf(SearchString, StringComparison.OrdinalIgnoreCase) != -1)
+                .ToList();
+        }
+        else
+        {
+            clientList = searchClientData;
+        }
+    }
+
+    private async Task AddClientData()
+    {
+        DialogParameters dialogParameters = new DialogParameters();
+        dialogParameters.Add("FormAction", FormAction.Add);
+
+        var options = new DialogOptions { CloseOnEscapeKey = true, CloseButton = true, Position = DialogPosition.Center, MaxWidth = MaxWidth.Medium, FullWidth = true };
+
+        var data = DialogService.Show<AddEditClient>("Add Client",dialogParameters, options);
+        var result = await data.Result;
+
+        if (!result.Canceled)
+        {
+            // Show a success message when the dialog is closed
+            Snackbar.Add("Client saved successfully.", Severity.Success);
+            await ReloadGrid();
+            await InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    private async Task ReloadGrid()
+    {
+        if (_dataGrid is not null)
+        {
+            await _dataGrid!.ReloadServerData();
+        }
+    }
+
+    private async Task EditClient(long clientId)
+    {
+        DialogParameters dialogParameters = new DialogParameters();
+        dialogParameters.Add("ClientId", clientId);
+        dialogParameters.Add("FormAction", FormAction.Add);
+
+        var data = DialogService.Show<AddEditClient>("Edit Client", dialogParameters, new DialogOptions()
+        {
+            CloseButton = true,
+            Position = DialogPosition.Center,
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true
+        });
+
+        var result = await data.Result;
+
+        if (!result.Canceled)
+        {
+            // Show a success message when the dialog is closed
+            Snackbar.Add("Client saved successfully.", Severity.Success);
+            await ReloadGrid();
+            await InvokeAsync(() => StateHasChanged());
+        }
+    }
+
+    protected async Task DeleteConfirm(Client client = null)
+    {
+        var options = new DialogOptions { CloseButton = true };
+        var parameters = new DialogParameters();
+
+        if (client != null)
+        {
+            _dataGrid.SelectedItems.Add(client);
+        }
+
+        if (_dataGrid.SelectedItems.Count() == 0)
+        {
+            parameters.Add("DialogContent", $"Please select clients to delete.");
+            parameters.Add("CancelButtonText", "OK");
+            parameters.Add("ShowConfirmButton", false);
+        }
+        else if (_dataGrid.SelectedItems.Count() > 0)
+        {
+            parameters.Add("DialogContent", $"This action cannot be undo.");
+        }
+
+        var dialog = DialogService.Show<ConfirmationDialog>("Confirm delete request", parameters);
+        var result = await dialog.Result;
+
+        if (result!= null && !result.Canceled)
+        {
+            //Delete all selected record
+            var data = ClientService.BulkDeleteClient(_dataGrid.SelectedItems.Select(x => x.Id).ToList());
+            if (data.Success && data.Result)
+            {
+                Snackbar.Add("Client deleted successfully", MudBlazor.Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("There was an error encountered while attempting to delete the client.", MudBlazor.Severity.Error);
+            }
+
+            await ReloadGrid();
+        }
+    }
+
+    public void ResetSearch()
+    {
+        SearchString = string.Empty;
+        clientList = searchClientData;
+    }
+
+    private void PreventAction()
+    {
+        StateHasChanged();
+        preventAction = !_dataGrid.SelectedItems.Any();
+    }
+}

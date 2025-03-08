@@ -1,0 +1,84 @@
+﻿@page "/account/login"
+
+@using CMS.FluentUI.CustomAuthentication;
+@using CMS.Data.FormModels
+@using System.Security.Claims;
+@using System.ComponentModel.DataAnnotations
+
+<PageTitle>Login form</PageTitle>
+
+<h1>Starfleet Starship Database</h1>
+<p>
+    This form uses the Fluent UI input components. It uses a <code>DataAnnotationsValidator</code>, a <code>FluentValidationSummary</code>
+    and <code>FluentValidationMessage</code>s.
+</p>
+
+<h2>New Ship Entry Form</h2>
+
+<EditForm Model="@person" OnSubmit="@HandleValidSubmit" FormName="login-form">
+    <FluentTextField Label="Name" Value="@person.Name" ValueChanged="@((e) => person.Name = e)" />
+    <FluentButton Type="ButtonType.Submit">Submit</FluentButton>
+</EditForm>
+
+
+@code{
+    public Person person = new Person();
+
+    private void HandleValidSubmit()
+    {
+        // Handle form submission
+        //Console.WriteLine($"Name: {person.Name}, Age: {person.Age}, Gender: {person.Gender}, Birthdate: {person.Birthdate}");
+    }
+
+    public class Person
+    {
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        [Range(1, 120)]
+        public int Age { get; set; }
+
+        [Required]
+        public string Gender { get; set; }
+
+        [Required]
+        public DateTime Birthdate { get; set; }
+    }
+}
+
+@* <PageTitle>Login</PageTitle> *@
+
+@* <div class="card" style="width:50%;align-content:center;">
+    <h4 class="card-header">Login</h4>
+    <div class="card-body">
+        
+    </div>
+</div> *@
+@* <EditForm Model="@loginFM" OnValidSubmit="OnValidSubmit" FormName="login-form" novalidate>
+    <DataAnnotationsValidator />
+    <FluentValidationSummary />
+    <FluentStack Orientation="Orientation.Vertical">
+        <div>
+            <FluentTextField @bind-Value="loginFM.Username" Label="Username" Placeholder="Enter Username" />
+            <FluentValidationMessage For="@(() => loginFM.Username)" />
+        </div>
+        <div>
+            <FluentTextField @bind-Value="loginFM.Password" TextFieldType="TextFieldType.Password" Label="Password" Placeholder="Enter Password" />
+            <FluentValidationMessage For="@(() => loginFM.Password)" />
+        </div>
+        <FluentButton Type="ButtonType.Submit" Disabled="@loading" Appearance="Appearance.Accent">
+            @*  @if (loading)
+            {
+            <span class="spinner-border spinner-border-sm mr-1"></span>
+            } 
+            Login
+        </FluentButton>
+    </FluentStack>
+
+    @*<div class="form-group text-center text-dark col-12 my-2">
+    <label>
+    Don't Have an Account? Please <NavLink href="account/register" class="btn btn-link">Register</NavLink>
+    </label>
+    </div>
+</EditForm> *@

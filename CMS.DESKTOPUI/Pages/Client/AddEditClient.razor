@@ -1,0 +1,167 @@
+﻿@page "/client/add"
+@page "/client/edit/{clientId:long}"
+
+@using CMS.Data.ContextModels;
+@using CMS.Data.Enum
+@using CMS.Data.FormModels;
+@using CMS.Repository.Interface;
+@using CMS.Services;
+@using CMS.Services.Interface;
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@using System.ComponentModel.DataAnnotations
+
+
+@inject IClientService ClientService
+@inject NavigationManager NavigationManager
+@inject IUserRepository UserRepository
+@inject ProtectedSessionStorage Session
+@inject DialogService DialogService
+
+<MudGrid Class="p-3">
+    <MudItem xs="12">
+        <EditForm Model="@clientFM" OnValidSubmit="OnValidSubmit">
+            <MudStack>
+                <!-- Name and Email Fields -->
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Name" Variant="Variant.Outlined" @bind-Value="clientFM.User.Name" Required="true" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Email" Variant="Variant.Outlined" @bind-Value="clientFM.User.Email" Required="true" Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" />
+                    </MudItem>
+                </MudGrid>
+
+                <!-- City and State Fields -->
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="City" Variant="Variant.Outlined" @bind-Value="clientFM.User.City" Required="true" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="State" Variant="Variant.Outlined" @bind-Value="clientFM.State" Required="true" />
+                    </MudItem>
+                </MudGrid>
+
+                <!-- Aadhar Number and Pan Card Number -->
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Aadhar Number" Variant="Variant.Outlined" @bind-Value="clientFM.AadharNumber" Required="true" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Pan Card Number" Variant="Variant.Outlined" @bind-Value="clientFM.PanCardNumber" Required="true" />
+                    </MudItem>
+                </MudGrid>
+
+                <!-- Mobile Number and Voting ID -->
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Mobile Number" Variant="Variant.Outlined" @bind-Value="clientFM.User.MobileNo" Required="true" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Voting ID" Variant="Variant.Outlined" @bind-Value="clientFM.VotingId" Required="true" />
+                    </MudItem>
+                </MudGrid>
+
+                <!-- Username and Password Fields -->
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Password" Variant="Variant.Outlined" @bind-Value="clientFM.User.Password" Required="true" InputType="InputType.Password" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <label style="align-content:center;" class="me-2">Gender: </label>
+                        <MudRadioGroup @bind-Value="clientFM.User.Gender" Required="true">
+                            @foreach (string gender in genderList)
+                            {
+                                <MudRadio Value="@gender" Color="Color.Primary" Size="Size.Medium">@gender</MudRadio>
+                            }
+                        </MudRadioGroup>
+                        
+                    </MudItem>
+                </MudGrid>
+
+                <!-- Address Field -->
+                <MudTextField Label="Address" Variant="Variant.Outlined" Class="mb-3" @bind-Value="clientFM.User.Address" Required="true" Lines="4" />
+            </MudStack>
+
+            <!-- Form Actions -->
+            <div class="d-flex justify-content-end">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Disabled="@loading">
+                    @if (loading)
+                    {
+                        <MudProgressCircular Size="Size.Medium" Color="Color.Primary" Indeterminate="true" />
+                    }
+                    Save
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Class="mx-2" OnClick="@(() => NavigationManager.NavigateTo("client/clientlist"))">
+                    Close
+                </MudButton>
+            </div>
+        </EditForm>
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    [Parameter]
+    public long clientId { get; set; }
+
+    [Parameter]
+    public FormAction FormAction { get; set; }
+
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+
+    private User user = new User();
+    private string title = string.Empty;
+    private ClientFM clientFM = new ClientFM();
+    private Client clientData = new Client();
+    private bool loading;
+    private List<string> genderList = new List<string>() { "Male", "Female", "Other" };
+    ProtectedBrowserStorageResult<string> userName = new ProtectedBrowserStorageResult<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (clientId > 0)
+        {
+            clientFM = ClientService.GetClientById(clientId);
+        }
+        else
+        {
+            clientFM.User = new User();
+            userName = await Session.GetAsync<string>("User");
+            user = UserRepository.GetLoggedInUser(userName.Value);
+        }
+
+        base.OnInitialized();
+    }
+
+    private async Task OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            await Task.Delay(200);   
+            clientFM.User.Role = "Client";
+            clientFM.User.Username = clientFM.User.Email;
+            clientFM.User.CreatedBy = user.Username;
+            if (clientFM.Id > 0)
+            {
+                var userInfo = ClientService.UpdateClient(clientFM);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                var userInfo = ClientService.CreateClient(clientFM);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+        }
+        catch (Exception ex)
+        {
+            loading = false;
+            StateHasChanged();
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+}

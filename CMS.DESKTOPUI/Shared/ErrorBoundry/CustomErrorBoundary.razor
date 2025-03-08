@@ -1,0 +1,34 @@
+﻿@using MudBlazor
+<div class="alert alert-danger error-div">
+    <MudItem Class="d-flex justify-start ma-2" md="12" sm="12" lg="12">
+        <MudText Style="font-size:large">
+            @string.Concat("Error: ", Ex.GetType())
+        </MudText>
+    </MudItem>
+    <MudItem Class="d-flex justify-start ma-2" md="12" sm="12" lg="12">
+        <MudText Style="font-size:medium">
+            @string.Concat("Message: ", Ex.Message)
+        </MudText>
+    </MudItem>
+    <MudItem Class="d-flex justify-end" md="12" sm="12" lg="12">
+        <MudButton Style="height: 40px;"  OnClick="@(() => ErrorBoundary.Recover())" Variant="Variant.Filled" Color="Color.Primary" Class="ma-2">Back</MudButton>
+    </MudItem>
+</div>
+
+@code {
+    [Parameter] public Exception Ex { get; set; }
+
+    [Parameter] public ErrorBoundary ErrorBoundary { get; set; }
+
+    [Inject] public ILogger<CustomErrorBoundary> Logger { get; set; }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if(firstRender)
+        {
+            Logger.LogError(Ex, Ex.Message);
+        }
+
+        base.OnAfterRender(firstRender);
+    }
+}

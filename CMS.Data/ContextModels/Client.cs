@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CMS.Data.ContextModels
 {
@@ -12,13 +9,14 @@ namespace CMS.Data.ContextModels
         {
             this.Cases = new HashSet<Case>();
         }
+
         public long UserId { get; set; }
         public virtual User User { get; set; }
         public string State { get; set; }
         public DateTime? DateOfBirth { get; set; } = DateTime.UtcNow;
-        public long AadharNumber { get; set; }
-        public long PanCardNumber { get; set; }
-        public long VotingId { get; set; }
+        public string AadharNumber { get; set; }
+        public string PanCardNumber { get; set; }
+        public string VotingId { get; set; }
         public virtual ICollection<Case> Cases { get; set; }
     }
 }

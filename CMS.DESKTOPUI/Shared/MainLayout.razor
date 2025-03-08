@@ -1,15 +1,109 @@
-﻿@inherits LayoutComponentBase
+﻿@using CMS.DESKTOPUI.CustomAuthentication;
+@using CMS.DESKTOPUI.Pages
+@using CMS.DESKTOPUI.Pages.Account
+@using CMS.Services
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+@using MudBlazor
+@using System.Net
+@using CMS.DESKTOPUI.Theme
+@using CMS.Services.Interface
+@using CMS.Data.ContextModels
+@using CMS.Repository.Interface
+@using System.Security.Claims;
+
+@inherits LayoutComponentBase
+@inject TitleService TitleService
+@inject IUserService UserService
+@inject ProtectedSessionStorage Session
+@inject IUserRepository _userRepository
 
 <PageTitle>CMS.DESKTOPUI</PageTitle>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@* <RadzenDialog/>
+<RadzenNotification/> *@
 
-    <main>
-        <article class="content px-4">
+<MudThemeProvider Theme="@Theme.MudTheme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout Style="background-color:#f4f5f9;flex:1;">
+    @{
+        var currentUri = NavigationManager.Uri;
+        var isPublicPage = currentUri.Contains("register", StringComparison.OrdinalIgnoreCase);
+    }
+
+    @if (isPublicPage)
+    {
+        <MudMainContent>
             @Body
-        </article>
-    </main>
-</div>
+        </MudMainContent>
+    }
+    else
+    {
+        <AuthorizeView>
+            <Authorized>
+                <MudAppBar Class="bg-white py-2 mudappbar-custom" Elevation="1">
+                    <MudIconButton Class="d-lg-none d-md-none d-block" Size="Size.Small" Icon="@Icons.Material.Filled.Menu" Color="Color.Dark" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                    <MudItem>
+                        <label class="ml-1 header-title-text">@TitleService.CurrentPageTitle</label>
+                    </MudItem>
+                    <MudSpacer />
+                        <MudItem>
+                        <label class="ml-1 me-2 header-title-text">Hello @userData.Name (@userData.Role)</label>
+                        </MudItem>
+                    <MudLink @onclick="Logout" Href="javascript:void(0)" Style="text-decoration:none;">Logout</MudLink>
+                </MudAppBar>
+                <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
+                    <MudDrawerHeader Class="my-3 mb-5">
+                        <h2>CRMS</h2>
+                    </MudDrawerHeader>
+                    <NavMenu />
+                </MudDrawer>
+                <MudMainContent>
+                    <div class="main-content-container" style="padding: 25px !important;background-color:#f4f5f9;">
+                        @Body
+                    </div>
+                </MudMainContent>
+            </Authorized>
+            <NotAuthorized>
+                <MudMainContent>
+                    <Login />
+                </MudMainContent>
+            </NotAuthorized>
+        </AuthorizeView>
+    }
+</MudLayout>
+
+@code {
+    [Parameter] public long userId { get; set; }
+    private User userData = new User();
+    public ClaimsPrincipal loggedInUser { get; set; }
+    public string role;
+
+    protected override async Task OnInitializedAsync()
+    {
+         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+         loggedInUser = authState.User;
+
+        if (loggedInUser != null)
+        {
+            if (loggedInUser.Identity != null && loggedInUser.Identity.IsAuthenticated)
+            {
+                var userSessionId = await Session.GetAsync<long>("UserId");
+
+                userId = userSessionId.Success ? userSessionId.Value : 0;
+
+                // Retrieve user details using the UserService
+                if (userId > 0)
+                {
+                    userData = UserService.GetUserById(userId);
+                }
+            }
+        }
+        
+
+        await base.OnInitializedAsync();
+    }
+}
+

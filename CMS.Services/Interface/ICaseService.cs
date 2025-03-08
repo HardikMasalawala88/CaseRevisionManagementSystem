@@ -1,9 +1,8 @@
 ﻿using CMS.Data.ContextModels;
 using CMS.Data.FormModels;
-using System;
+using CMS.Data.ParameterModels;
+using CMS.Data.ServiceResponse;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CMS.Services.Interface
@@ -11,7 +10,13 @@ namespace CMS.Services.Interface
     public interface ICaseService
     {
         CaseFM CreateOrUpdateCase(CaseFM caseFM);
-        IEnumerable<Case> ListCaseDetail();
+        CaseDocumentFM CreateOrUpdateCaseDocument(CaseDocumentFM caseDocument);
+        List<CaseDocument> ListCaseDocDetail();
+        List<Case> ListCaseDetail();
+        List<Case> ListClientCases(long clientId);
         bool RemoveCaseDetail(long caseId);
+        CaseFM GetCaseById(long caseId);
+        Task<ServiceResponse<Paginate<Case>>> GetCaseAsync(GetCaseParameters getCaseParameters);
+        ServiceResponse<bool> BulkDeleteCase(List<long> ids);
     }
 }

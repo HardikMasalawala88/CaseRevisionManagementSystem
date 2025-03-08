@@ -1,9 +1,11 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+#nullable disable
+
 namespace CMS.Data.Migrations
 {
-    public partial class CMS_Initial1 : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -47,20 +49,64 @@ namespace CMS.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    SubscriptionPackageId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SubscriptionPackages",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DurationDays = table.Column<int>(type: "int", nullable: false),
+                    IsTrial = table.Column<bool>(type: "bit", nullable: false),
+                    PackagePrice = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SubscriptionPackages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserData",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    City = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EmailId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    MobileNo = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MobileNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Role = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -179,17 +225,45 @@ namespace CMS.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserSubscriptions",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    PackageId = table.Column<long>(type: "bigint", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserSubscriptions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserSubscriptions_SubscriptionPackages_PackageId",
+                        column: x => x.PackageId,
+                        principalTable: "SubscriptionPackages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Clients",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
-                    State = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    State = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    AadharNumber = table.Column<long>(type: "bigint", nullable: false),
-                    PanCardNumber = table.Column<long>(type: "bigint", nullable: false),
-                    VotingId = table.Column<long>(type: "bigint", nullable: false),
+                    AadharNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PanCardNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VotingId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -215,13 +289,11 @@ namespace CMS.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
                     DateOfBirth = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    AadharNumber = table.Column<long>(type: "bigint", nullable: false),
-                    PanCardNumber = table.Column<long>(type: "bigint", nullable: false),
-                    VotingId = table.Column<long>(type: "bigint", nullable: false),
-                    Lawyer_uniqueNumber = table.Column<long>(type: "bigint", nullable: false),
-                    Specialization = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AppointmentId = table.Column<long>(type: "bigint", nullable: false),
-                    CaseId = table.Column<long>(type: "bigint", nullable: false),
+                    AadharNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PanCardNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VotingId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Lawyer_uniqueNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Specialization = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -247,9 +319,11 @@ namespace CMS.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ClientId = table.Column<long>(type: "bigint", nullable: false),
                     LawyerId = table.Column<long>(type: "bigint", nullable: false),
-                    CaseDetail = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CaseTitle = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CaseDetail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CaseNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     HearingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CourtLocation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CourtLocation = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CaseParentId = table.Column<long>(type: "bigint", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -272,6 +346,45 @@ namespace CMS.Data.Migrations
                         principalTable: "Lawyers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CaseDocuments",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CaseId = table.Column<long>(type: "bigint", nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDelete = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CaseDocuments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CaseDocuments_Cases_CaseId",
+                        column: x => x.CaseId,
+                        principalTable: "Cases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "SubscriptionPackages",
+                columns: new[] { "Id", "CreatedBy", "CreatedDate", "DurationDays", "IsDelete", "IsTrial", "ModifiedBy", "ModifiedDate", "Name", "PackagePrice" },
+                values: new object[,]
+                {
+                    { 1L, null, new DateTime(2024, 11, 30, 7, 48, 59, 321, DateTimeKind.Utc).AddTicks(2968), 15, false, true, null, null, "Free", 0 },
+                    { 2L, null, new DateTime(2024, 11, 30, 7, 48, 59, 321, DateTimeKind.Utc).AddTicks(2972), 30, false, false, null, null, "1Month", 100 },
+                    { 3L, null, new DateTime(2024, 11, 30, 7, 48, 59, 321, DateTimeKind.Utc).AddTicks(2973), 90, false, false, null, null, "3Month", 200 },
+                    { 4L, null, new DateTime(2024, 11, 30, 7, 48, 59, 321, DateTimeKind.Utc).AddTicks(2974), 180, false, false, null, null, "6Month", 300 },
+                    { 5L, null, new DateTime(2024, 11, 30, 7, 48, 59, 321, DateTimeKind.Utc).AddTicks(2975), 270, false, false, null, null, "9Month", 400 },
+                    { 6L, null, new DateTime(2024, 11, 30, 7, 48, 59, 321, DateTimeKind.Utc).AddTicks(2976), 365, false, false, null, null, "12Month", 500 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -314,6 +427,11 @@ namespace CMS.Data.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CaseDocuments_CaseId",
+                table: "CaseDocuments",
+                column: "CaseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Cases_ClientId",
                 table: "Cases",
                 column: "ClientId");
@@ -338,6 +456,11 @@ namespace CMS.Data.Migrations
                 name: "IX_Lawyers_UserId",
                 table: "Lawyers",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserSubscriptions_PackageId",
+                table: "UserSubscriptions",
+                column: "PackageId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -358,13 +481,25 @@ namespace CMS.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Cases");
+                name: "CaseDocuments");
+
+            migrationBuilder.DropTable(
+                name: "Payments");
+
+            migrationBuilder.DropTable(
+                name: "UserSubscriptions");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Cases");
+
+            migrationBuilder.DropTable(
+                name: "SubscriptionPackages");
 
             migrationBuilder.DropTable(
                 name: "Clients");
