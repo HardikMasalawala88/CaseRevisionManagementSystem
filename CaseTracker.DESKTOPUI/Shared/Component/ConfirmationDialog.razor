@@ -1,0 +1,42 @@
+﻿@using MudBlazor;
+<div class="sms-custom-dialog d-flex justify-content-center">
+    <MudDialog Class="confirmation-dialog">
+        <TitleContent>
+            <div class="mt-3">
+                @MudDialog.Title
+            </div>
+        </TitleContent>
+        <DialogContent>
+            @((MarkupString)DialogContent)
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel" Class="me-1" Variant="Variant.Filled">@CancelButtonText</MudButton>
+            @if (ShowConfirmButton)
+            {
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Confirm">@ConfirmButtonText</MudButton>
+            }
+        </DialogActions>
+    </MudDialog>
+</div>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public string DialogContent { get; set; }
+
+    [Parameter] public string ConfirmButtonText { get; set; } = "Confirm";
+
+    [Parameter] public string CancelButtonText { get; set; } = "Cancel";
+
+    [Parameter] public bool ShowConfirmButton { get; set; } = true;
+
+    void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    void Confirm()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}

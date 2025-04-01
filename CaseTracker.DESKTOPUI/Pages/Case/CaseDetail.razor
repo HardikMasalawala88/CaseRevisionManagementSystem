@@ -1,0 +1,90 @@
+﻿@using CaseTracker.DESKTOPUI.Pages.Client
+@using CaseTracker.Data.ContextModels
+@using CaseTracker.Data.Enum
+@using CaseTracker.Data.FormModels
+@using CaseTracker.Repository.Interface
+@using CaseTracker.Services.Interface
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+
+@inject ICaseService CaseService
+@inject IClientService ClientService
+@inject ILawyerService LawyerService
+@inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage Session
+@inject IUserRepository UserRepository
+
+
+<MudPaper Class="pa-4">
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Case Title" @bind-Value="caseData.CaseTitle" ReadOnly="true" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Case Number" @bind-Value="caseData.CaseNumber" ReadOnly="true" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem xs="12">
+            <MudTextField Label="Case Detail" @bind-Value="caseData.CaseDetail" ReadOnly="true" Variant="Variant.Outlined" Multiline="true" Rows="3" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Court Location" @bind-Value="caseData.CourtLocation" ReadOnly="true" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Hearing Date" Value="@caseData.HearingDate.ToString("yyyy-MM-dd")" ReadOnly="true" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Client" Value="@selectedClient" ReadOnly="true" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Lawyer" Value="@lawyerData.User.Email" ReadOnly="true" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Parent Case" Value="@selectedCaseParentId" ReadOnly="true" Variant="Variant.Outlined" />
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<div style="display: flex; justify-content: flex-end; margin: 10px;">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Medium" OnClick="CloseDialog">Close</MudButton>
+</div>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public long CaseId { get; set; }
+
+    [Parameter]
+    public FormAction FormAction { get; set; }
+
+    ProtectedBrowserStorageResult<string> userName = new ProtectedBrowserStorageResult<string>();
+    private CaseFM caseData = new CaseFM();
+    private string selectedClient = string.Empty;
+    private string selectedCaseParentId = string.Empty;
+    private User userData = new User();
+    private List<CaseDocument> caseDocuments = new List<CaseDocument>();
+    private List<Case> cases;
+    private Lawyer lawyerData = new Lawyer();
+
+    protected override async Task OnInitializedAsync()
+    {
+        cases = CaseService.ListCaseDetail();
+
+        if (CaseId > 0)
+        {
+            caseData = CaseService.GetCaseById(CaseId);
+            var caseInfo = cases.FirstOrDefault(c => c.Id == caseData.CaseParentId);
+            if (caseData is not null && caseData.Id > 0)
+            {
+                    selectedClient = ClientService.GetClientById(caseData.ClientId).User.Email;
+                    selectedCaseParentId = caseInfo != null ? caseInfo.CaseNumber : string.Empty;
+            }
+
+            caseDocuments = CaseService.ListCaseDocDetail();
+        }
+
+        lawyerData = LawyerService.GetLawyerData(caseData.LawyerId);
+    }
+
+    private void CloseDialog() => MudDialog.Close();
+}

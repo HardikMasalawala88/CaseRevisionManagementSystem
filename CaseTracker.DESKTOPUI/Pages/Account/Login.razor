@@ -1,0 +1,129 @@
+﻿@page "/account/login"
+
+@using CaseTracker.DESKTOPUI.CustomAuthentication;
+@using CaseTracker.DESKTOPUI.CustomAuthentications;
+@using CaseTracker.Data.FormModels
+@using CaseTracker.Services.Interface
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using System.Security.Claims;
+@using MudBlazor
+@using System.ComponentModel.DataAnnotations
+
+@inject NavigationManager NavigationManager
+@inject IAccountService AccountService
+@inject ProtectedSessionStorage Session
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Login</PageTitle>
+
+<div class="account-pages">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-lg-6 col-xl-6 col-12 d-flex align-items-center justify-content-center left-side">
+                <div class="border-0">
+                    <div class="mx-auto pt-0" style="max-width: 410px;">
+                        <div class="auth-logo">
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <span class="">
+                                        <span class="avatar-title">
+                                            <h2>CRMS</h2>
+                                        </span>
+                                    </span>
+                                </div>
+
+                                <div class="mt-3 col-12 text-center">
+                                    <div class="page-title">The simplest case management tool</div>
+                                </div>
+                                <div class="my-1 mb-2 col-12 text-center">
+                                    <div class="page-sub-title text-center">Login to your account</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-2 mt-5">
+                            <EditForm Model="@loginFM" OnValidSubmit="OnValidSubmit">
+                                <div class="form-group mb-2">
+                                    <MudTextField ShrinkLabel @bind-Value="loginFM.Username" Variant="Variant.Outlined" T="string" Label="Username" Required="true" RequiredError="Username is required!" Placeholder="Enter Username"
+                                                  Validation="@(new EmailAddressAttribute() {ErrorMessage = "Username is invalid"})" />
+
+                                    @* <MudTextField ShrinkLabel Placeholder="Enter username" Required="true" RequiredError="User name is required"
+                                                  @bind-Value="loginFM.Username" Label="Username" Variant="Variant.Outlined" Margin="Margin.Dense" /> *@
+                                </div>
+                                <div class="form-group mb-2">
+                                    <MudTextField ShrinkLabel T="string" Label="Password" Variant="Variant.Outlined"
+                                                  @bind-Value="loginFM.Password" InputType="InputType.Password" Placeholder="Enter Password" Required="true" RequiredError="Password is required!" />
+                                </div>
+
+                                <div class="mt-5">
+                                    <MudButton ButtonType="ButtonType.Submit" Disabled="@loading" Color="Color.Primary" FullWidth="true" Variant="Variant.Filled">
+                                        @if (loading)
+                                        {
+                                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                        }
+                                        Login
+                                    </MudButton>
+                                </div>
+                                <div class="d-flex justify-content-center my-5">
+                                    <p>
+                                        <MudButton OnClick="@(() => NavigateToRegister())" Variant="Variant.Text" Color="Color.Primary">Join as Lawyer</MudButton>
+                                    </p>
+                                </div>
+                            </EditForm>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 col-lg-6 col-xl-6 col-12 d-lg-block">
+                <div class="h-90 img-container d-flex align-items-center justify-content-center">
+                    <img src="svg/Login-promo-image.svg" class="img-fluid" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginFM loginFM = new LoginFM();
+    private bool loading;
+
+    private void NavigateToRegister()
+    {
+        NavigationManager.NavigateTo("/account/register", true);
+    }
+
+    private async void OnValidSubmit()
+    {
+        loading = true;
+        try
+        {
+            var loggedInUser = AccountService.Login(loginFM);
+            var customAuthStateProvider = (CustomAuthStateProvider)AuthenticationStateProvider;
+
+            if (loggedInUser is not null)
+            {
+                await customAuthStateProvider.UpdateAuthneticationState(new UserSession
+                    {
+                        Username = loggedInUser.Username,
+                        Role = loggedInUser.Role
+                    });
+
+                await Session.SetAsync("User", loggedInUser.Username);
+                await Session.SetAsync("UserId", loggedInUser.Id);
+                await Session.SetAsync("Role", loggedInUser.Role);
+            }
+            if (loggedInUser.Role == "Lawyer")
+            {
+                NavigationManager.NavigateTo("/user/dashboard", true);
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            loading = false;
+            StateHasChanged();
+        }
+    }
+}

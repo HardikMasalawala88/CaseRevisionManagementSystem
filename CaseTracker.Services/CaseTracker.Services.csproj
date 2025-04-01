@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="RazorPay.Core" Version="1.0.2" />
+    <PackageReference Include="RazorPay.IFSC.Client" Version="1.0.0" />
+    <PackageReference Include="StackExchange.Redis" Version="2.8.31" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CaseTracker.Data\CaseTracker.Data.csproj" />
+    <ProjectReference Include="..\CaseTracker.Repository\CaseTracker.Repository.csproj" />
+  </ItemGroup>
+
+</Project>

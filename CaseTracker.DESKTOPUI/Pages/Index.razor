@@ -1,0 +1,21 @@
+﻿@page "/"
+@using CaseTracker.Services
+
+@inject TitleService TitleService
+
+<PageTitle>Home</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <h1>Hello, @context.User.Identity.Name !</h1>
+    </Authorized>
+</AuthorizeView>
+
+@code{
+    protected override void OnInitialized()
+    {
+        TitleService.CurrentPageTitle = "Home";
+
+        base.OnInitialized();
+    }
+}

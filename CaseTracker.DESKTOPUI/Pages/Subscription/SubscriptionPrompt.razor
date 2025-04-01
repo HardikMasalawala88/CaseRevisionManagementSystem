@@ -1,0 +1,169 @@
+﻿@page "/Subscription/SubscriptionPrompt/{UserId:long}"
+
+@using CaseTracker.Data.ParameterModels
+@using CaseTracker.Services.Interface
+@using CaseTracker.Data.FormModels
+@using CaseTracker.Data.ContextModels
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Radzen;
+
+@inject ISubscriptionService SubscriptionService
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService
+@inject ProtectedSessionStorage Session
+@inject IJSRuntime JSRuntime
+@inject IHttpClientFactory HttpClientFactory
+@inject ISnackbar Snackbar
+
+<MudDialog id="subscriptionDialog">
+    <TitleContent>
+        Manage Your Subscription
+    </TitleContent>
+    <DialogContent>
+        @if (activeSubscription == null || activeSubscription.EndDate < DateTime.Now)
+        {
+            <p>Your trial has ended. Please select a subscription package to continue.</p>
+            @if (nonTrialPackages != null)
+            {
+                <select @bind="selectedPackageId">
+                    <option value="0">-- Select a Package --</option>
+                    @foreach (var package in nonTrialPackages)
+                    {
+                        <option value="@package.Id">@package.Name</option>
+                    }
+                </select>
+                <p>Selected Package Price: ₹@selectedPackagePrice</p>
+            }
+            else
+            {
+                <p>Loading packages...</p>
+            }
+
+        }
+        else
+        {
+            <p>Your current subscription is active until @activeSubscription.EndDate.ToShortDateString()</p>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Variant="MudBlazor.Variant.Filled" id="payButton" Color="Color.Primary" OnClick="@(() => InitialPayment())">Subscribe</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    private UserSubscription activeSubscription;
+    private List<SubscriptionPackage> nonTrialPackages;
+    [Parameter] public long userId { get; set; }
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    private int _selectedPackageId;
+    private int selectedPackagePrice;
+
+    private int selectedPackageId
+    {
+        get => _selectedPackageId;
+        set
+        {
+            _selectedPackageId = value;
+
+            // Update price dynamically when the selected package changes
+            selectedPackagePrice = nonTrialPackages
+                .FirstOrDefault(p => p.Id == _selectedPackageId)?.PackagePrice ?? 0;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userSessionId = await Session.GetAsync<long>("UserId");
+        userId = userSessionId.Value > 0 ? userSessionId.Value : 0;
+        // Fetch current active subscription
+        activeSubscription = await SubscriptionService.GetUserActiveSubscriptionAsync(userId); // Pass the current user's ID
+
+        // If trial expired, fetch non-trial packages
+
+        if (activeSubscription == null || activeSubscription.EndDate < DateTime.Now)
+        {
+            nonTrialPackages = await SubscriptionService.GetNonTrialPackagesAsync();
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void UpdatePackagePrice(ChangeEventArgs e)
+    {
+        // Parse selected package ID
+        selectedPackageId = int.Parse(e.Value.ToString());
+
+        // Fetch price of the selected package
+        selectedPackagePrice = nonTrialPackages
+            .FirstOrDefault(p => p.Id == selectedPackageId)?.PackagePrice ?? 0;
+    }
+
+    private async Task InitialPayment()
+    {
+        if (userId <= 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", "User ID is invalid.");
+            return;
+        }
+
+        if (selectedPackageId == 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", "Please select a package before subscribing.");
+            return;
+        }
+
+        if (selectedPackagePrice <= 0)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", "Invalid package price. Please try again.");
+            return;
+        }
+
+        try
+        {
+            // Create a Razorpay order using the selected package price
+            var orderId = await SubscriptionService.CreateRazorpayOrderAsync(selectedPackagePrice, selectedPackageId, userId);
+
+            // Open Razorpay payment gateway
+            await JSRuntime.InvokeVoidAsync("openRazorpay", orderId, selectedPackagePrice, userId);
+        }
+        catch (Exception ex)
+        {
+            NotificationService.Notify(NotificationSeverity.Error, "Error", $"An error occurred: {ex.Message}");
+        }
+    }
+
+    private void OnPaymentVerification(bool paymentSuccess)
+    {
+       
+           if (paymentSuccess)
+           {
+               MudDialog.Cancel(); // Close the dialog
+               NotificationService.Notify(NotificationSeverity.Success, "Success", "Payment successful!");
+           }
+           else
+           {
+               NotificationService.Notify(NotificationSeverity.Error, "Error", "Payment verification failed.");
+           }
+    }
+
+    // [JSInvokable("ShowToast")]
+    // public void ShowToast(string type, string message)
+    // {
+    //     if (type == "success")
+    //     {
+    //         Snackbar.Add(message, Severity.Success);
+    //     }
+    //     else if (type == "error")
+    //     {
+    //         Snackbar.Add(message, Severity.Error);
+    //     }
+    // }
+
+}
+
+

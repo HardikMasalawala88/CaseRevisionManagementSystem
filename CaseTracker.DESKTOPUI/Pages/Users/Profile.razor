@@ -1,0 +1,211 @@
+﻿@page "/user/profile/{userId:long}"
+
+@using CaseTracker.DESKTOPUI.Pages.Subscription
+@using CaseTracker.Data.ContextModels
+@using CaseTracker.Data.FormModels
+@using CaseTracker.Services
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using CaseTracker.Services.Interface
+@using MudBlazor
+@* @using Radzen *@
+
+@inject IAccountService AccountService
+@inject IUserService UserService
+@inject TitleService TitleService
+@inject ProtectedSessionStorage Session
+@inject ISubscriptionService SubscriptionService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<style>
+    .mud-input > input.mud-input-root-outlined{
+        padding: 10.5px 14px;
+    }
+
+    .mud-input-control{
+        background-color: #fff;
+    }
+
+    .input-radio {
+        background-color: transparent;
+    }
+
+    .account-setting-heading-3{
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 24.72px;
+        text-align: left;
+        color: #041d4d;
+    }
+</style>
+
+<PageTitle>My Profile</PageTitle>
+
+@if (userData != null)
+{
+    <MudCard Class="p-4">
+        <MudCardContent>
+            <EditForm Model="@userData">
+                <DataAnnotationsValidator />
+
+                <MudGrid Class="account-setting">
+                    <MudItem lg="12" sm="12">
+                        <MudItem Class="account-setting-heading-3 mb-3">Account Setting</MudItem>
+                    </MudItem>
+                    
+                    <MudGrid Class="mt-4">
+                        <MudItem md="6" xs="12">
+                            <MudTextField @bind-Value="@userData.Name" Label="Name" Placeholder="Enter name" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem md="6" xs="12">
+                            <MudTextField @bind-Value="@userData.Email" Label="Email" Placeholder="Enter email" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem md="6" xs="12">
+                            <MudTextField @bind-Value="@userData.City" Label="City" Placeholder="Enter city" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem md="6" xs="12">
+                            <MudTextField @bind-Value="@userData.MobileNo" Label="Mobile" Placeholder="Enter Mobile no" Mask="@(new PatternMask("(00) 0000-000-000"))" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem md="6" xs="12">
+                            <MudTextField @bind-Value="@userData.Role" Label="Role" Disabled="true" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem md="6" xs="12">
+                            <MudRadioGroup @bind-Value="userData.Gender" Label="Gender" Class="input-radio" Required="true">
+                                @foreach (string gender in genderList)
+                                {
+                                    <MudRadio Value="@gender" Color="Color.Primary" Size="Size.Medium">@gender</MudRadio>
+                                }
+                            </MudRadioGroup>
+                        </MudItem>
+                        <MudItem md="12" xs="12">
+                            <MudTextField Lines="4" @bind-Value="@userData.Address" Label="Address" Placeholder="Enter address" Variant="Variant.Outlined" />
+                        </MudItem>
+                    </MudGrid>
+                    
+                    <MudDivider Class="my-4" />
+                    
+                    <MudText Class="account-setting-heading-3 mb-3">Password</MudText>
+                    
+                    <MudGrid>
+                        <MudItem md="6" xs="12">
+                            <MudTextField @bind-Value="@userData.Password" Label="Password" InputType="InputType.Password" Placeholder="Old password" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem md="6" xs="12">
+                            <AuthorizeView Roles="Lawyer">
+                                <Authorized Context="authorizedContext">
+                                    <MudText>Subscription</MudText>
+                                    @if (!hasSubscription)
+                                    {
+                                        <MudButton Color="Color.Primary" @onclick="() => AddSubscription(userData.Id)" Class="mx-1" Variant="Variant.Filled">Add Subscription</MudButton>
+                                    }
+                                    else
+                                    {
+                                        <MudText><strong>Subscription End Date:</strong> @userSubscription.EndDate.ToString("yyyy-MM-dd")</MudText>
+                                    }
+                                </Authorized>
+                            </AuthorizeView>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudGrid Class="mt-4">
+                        <MudItem md="12" xs="12" Class="d-flex gap-2">
+                            <AuthorizeView Roles="Lawyer">
+                                <Authorized Context="authorizedContext">
+                                    <MudButton Color="Color.Primary" Href="@($"subscription/paymentDetails/{userId}")" Variant="Variant.Filled">Payment Details</MudButton>
+                                </Authorized>
+                            </AuthorizeView>
+                            <MudButton Color="Color.Primary" Class="mx-1" Variant="Variant.Filled" OnClick="SaveChanges">Save Changes</MudButton>
+                        </MudItem>
+                    </MudGrid>
+                </MudGrid>
+            </EditForm>
+        </MudCardContent>
+    </MudCard>
+}
+else
+{
+    <MudText Style="color:#041D4D;font-weight:600">User account not found.</MudText>
+}
+
+@code {
+    [Parameter] public long userId { get; set; }
+    private User userData = new User();
+    private UserFM userFM = new UserFM();
+    private List<string> genderList = new List<string>() { "Male", "Female", "Other" };
+    private bool hasSubscription;
+    private UserSubscription userSubscription = new UserSubscription();
+
+    protected override async Task OnInitializedAsync()
+    {
+        TitleService.CurrentPageTitle = "Profile";
+        var userSessionId = await Session.GetAsync<long>("UserId");
+        userId = userSessionId.Value > 0 ? userSessionId.Value : 0;
+
+        userData = UserService.GetUserById(userId);
+
+        await base.OnInitializedAsync();
+
+        hasSubscription = SubscriptionService.HasSubscription(userId);
+        if (hasSubscription)
+        {
+            userSubscription = SubscriptionService.GetUserSubscriptionById(userId);
+
+            if (userSubscription != null && userSubscription.EndDate < DateTime.Now)
+            {
+                // Remove the subscription
+                SubscriptionService.RemoveSubscription(userSubscription.Id);
+            }
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        try
+        {
+            if (userData == null)
+            {
+                Snackbar.Add("User data is missing. Please reload the page.", Severity.Error);
+                return;
+            }
+
+            var userFM = new UserFM
+                {
+                    Id = userData.Id,
+                    Name = userData.Name,
+                    EmailId = userData.Email,
+                    City = userData.City,
+                    MobileNo = userData.MobileNo,
+                    Role = userData.Role,
+                    Gender = userData.Gender,
+                    Address = userData.Address,
+                    Password = userData.Password,
+                    Username = userData.Username
+                };
+            var isUpdated =  UserService.CreateOrUpdateUser(userFM);
+
+            if (isUpdated != null)
+            {
+                Snackbar.Add("User details updated successfully.", Severity.Success);
+
+                // Optionally refresh the user data to reflect any server-side changes
+                userData = UserService.GetUserById(userId);
+            }
+            else
+            {
+                Snackbar.Add("Failed to update user details. Please try again.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            // General exception handling
+            Snackbar.Add($"An error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private Task AddSubscription(long userId)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium, };
+
+        return DialogService.ShowAsync<SubscriptionPrompt>("Simple Dialog", options);
+    }
+}
