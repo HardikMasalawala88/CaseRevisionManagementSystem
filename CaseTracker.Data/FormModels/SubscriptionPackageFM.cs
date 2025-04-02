@@ -1,13 +1,14 @@
-﻿using System;
+﻿using CaseTracker.Data.ContextModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CaseTracker.Data.ContextModels
+namespace CaseTracker.Data.FormModels
 {
-    public class SubscriptionPackage : BaseEntityWithKey
-    { 
+    public class SubscriptionPackageFM : BaseEntityFM
+    {
         public string Name { get; set; }
         public int DurationDays { get; set; }
         public bool IsTrial { get; set; }

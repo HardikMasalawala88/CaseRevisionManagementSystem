@@ -1,4 +1,5 @@
 ﻿using CaseTracker.Data.CustomValidationAttribute;
+using CaseTracker.Data.Enum;
 using System.ComponentModel.DataAnnotations;
 
 namespace CaseTracker.Data.FormModels
@@ -31,6 +32,7 @@ namespace CaseTracker.Data.FormModels
         public string Password { get; set; }
 
         public string Role { get; set; }
+        public EnumLawyerSpecialization Specialization { get; set; }
 
         public virtual LawyerFM LawyerFM { get; set; } = new();
     }

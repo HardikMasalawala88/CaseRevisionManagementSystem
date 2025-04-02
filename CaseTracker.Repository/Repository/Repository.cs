@@ -3,10 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CaseTracker.Repository.Repository
 {
-    public class Repository<T> : IRepository<T> where T : BaseEntity
+    public class Repository<T> : IRepository<T> where T : BaseEntityWithKey
     {
         private readonly ApplicationContext _context;
         private DbSet<T> entities;
@@ -33,16 +34,21 @@ namespace CaseTracker.Repository.Repository
             return entities.AsEnumerable();
         }
 
-        public T GetById(long id)
+        public async Task<bool> IsExistAsync(Guid id)
+        {
+            return await entities.AnyAsync(s => s.Id == id);
+        }
+
+        public T GetById(Guid id)
         {
             return entities.SingleOrDefault(s => s.Id == id);
         }
         
-        public User GetByUsername(string userName)
-        {
-            var userData = _context.UserData.FirstOrDefault(x => x.Username.Equals(userName));
-            return userData;
-        }
+        //public ApplicationUser GetByUsername(string userName)
+        //{
+        //    var userData = _context.UserData.FirstOrDefault(x => x.Username.Equals(userName));
+        //    return userData;
+        //}
 
         public T Insert(T entity)
         {

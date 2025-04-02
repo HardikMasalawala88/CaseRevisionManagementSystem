@@ -19,7 +19,12 @@ namespace CaseTracker.Repository
             _clientRepository = clientRepository;
         }
 
-        public void DeleteClient(long id)
+        public Task<bool> IsExistAsync(Guid id)
+        {
+            return _clientRepository.IsExistAsync(id);
+        }
+
+        public void DeleteClient(Guid id)
         {
             Client client = GetClient(id);
             client.IsDelete = true;
@@ -46,8 +51,9 @@ namespace CaseTracker.Repository
             if (!string.IsNullOrEmpty(param.SearchStr))
             {
                 param.SearchStr = param.SearchStr.Trim().ToLower();
-                data = data.Where(m => !string.IsNullOrEmpty(m.User.Name) && m.User.Name.Trim().ToLower().Contains(param.SearchStr)
-                            || m.User.MobileNo.Trim().ToLower().Contains(param.SearchStr));
+                data = data.Where(m => !string.IsNullOrEmpty(m.User.Firstname) 
+                            && m.User.Name.Trim().ToLower().Contains(param.SearchStr)
+                            || m.User.PhoneNumber.Trim().ToLower().Contains(param.SearchStr));
             }
 
             switch (param.SortLabel)
@@ -59,33 +65,22 @@ namespace CaseTracker.Repository
                     break;
                 case "PhoneNumber":
                 case "Phone":
-                    data = param.SortDirection == EnumListSortDirection.Ascending ? data.OrderBy(x => x.User.MobileNo) : data.OrderByDescending(x => x.User.MobileNo);
+                    data = param.SortDirection == EnumListSortDirection.Ascending ? data.OrderBy(x => x.User.PhoneNumber) : data.OrderByDescending(x => x.User.PhoneNumber);
                     break;
                 default:
                     // Handle any unexpected sort label here
-                    data = data.OrderByDescending(x => x.Id);
+                    data = data.OrderByDescending(x => x.User.Name);
                     break;
             }
 
             result.TotalCount = data.Count();
-            result.Data = data.Skip(skip).Take(param.PageSize).Select(client => new Client
-            {
-                Id = client.Id,
-                AadharNumber = client.AadharNumber,
-                PanCardNumber = client.PanCardNumber,
-                VotingId = client.VotingId,
-                State = client.State,
-                UserId = client.UserId,
-                DateOfBirth = client.DateOfBirth,
-                CreatedDate = client.CreatedDate,
-            }).ToList();
-
+            result.Data = data.Skip(skip).Take(param.PageSize).ToList();
             return result;
         }
 
-        public bool BulkDeleteClient(List<long> ids)
+        public bool BulkDeleteClient(List<Guid> ids)
         {
-            var clientData = _clientRepository.GetAll().Where(x => ids.Contains(x.Id)).ToList();
+            var clientData = _clientRepository.GetAll().Where(x => ids.Contains(Guid.Parse(x.UserId))).ToList();
 
             clientData.ForEach(client =>
             {
@@ -96,7 +91,7 @@ namespace CaseTracker.Repository
             return true;
         }
 
-        public Client GetClient(long id)
+        public Client GetClient(Guid id)
         {
             return _clientRepository.GetById(id);
         }

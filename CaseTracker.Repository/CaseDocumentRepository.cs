@@ -14,7 +14,7 @@ namespace CaseTracker.Repository
             _caseDocumentRepository = caseDocumentRepository;
         }
 
-        public void DeleteCaseDocument(long id)
+        public void DeleteCaseDocument(Guid id)
         {
             CaseDocument caseDocInfo = GetCaseDocument(id);
             caseDocInfo.IsDelete = true;
@@ -24,7 +24,7 @@ namespace CaseTracker.Repository
             _caseDocumentRepository.SaveChanges();
         }
 
-        public CaseDocument GetCaseDocument(long id)
+        public CaseDocument GetCaseDocument(Guid id)
         {
             return _caseDocumentRepository.GetById(id);
         }

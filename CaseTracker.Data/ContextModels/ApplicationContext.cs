@@ -13,7 +13,8 @@ namespace CaseTracker.Data.ContextModels
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Lawyer>(entity => entity.HasIndex(e => e.Lawyer_uniqueNumber).IsUnique());
+            modelBuilder.Entity<Lawyer>(entity => entity.HasIndex(e => e.LawyerUniqueNumber).IsUnique());
+
             modelBuilder.Entity<Case>(entity =>
                 entity.HasOne(x => x.Lawyer)
                       .WithMany(x => x.Cases)
@@ -36,14 +37,15 @@ namespace CaseTracker.Data.ContextModels
             });
         }
 
-        public DbSet<User> UserData { get; set; }
         public DbSet<Lawyer> Lawyers { get; set; }
         public DbSet<Client> Clients { get; set; }
         public DbSet<Case> Cases { get; set; }
         public DbSet<CaseDocument> CaseDocuments { get; set; }
-        public DbSet<ApplicationUser> ApplicationUser { get; set; }
         public DbSet<SubscriptionPackage> SubscriptionPackages { get; set; }
         public DbSet<UserSubscription> UserSubscriptions { get; set; }
         public DbSet<Payment> Payments { get; set; }
+
+        //public DbSet<User> UserData { get; set; }
+        //public DbSet<ApplicationUser> ApplicationUser { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using CaseTracker.Data.FormModels;
 using CaseTracker.Data.ParameterModels;
 using CaseTracker.Data.ServiceResponse;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,16 +10,18 @@ namespace CaseTracker.Services.Interface
 {
     public interface IClientService
     {
-        ClientFM CreateClient(ClientFM clientFM);
-        ClientFM UpdateClient(ClientFM clientFM);
+        //ClientFM CreateClient(ClientFM clientFM);
+        //ClientFM UpdateClient(ClientFM clientFM);
         IEnumerable<Client> ListClientData();
-        Client GetClientData(long clientId);
-        ClientFM GetClientById(long clientId);
+        Client InsertClient(Client client);
+        Client GetClientData(string clientId);
+        ClientFM GetClientById(string clientId);
         Task<ServiceResponse<Paginate<Client>>> GetClientsAsync(GetClientsParameters getClientsParameters);
         Client GetClientUsingEmail(string email);
-        bool RemoveClient(long clientId);
-        Client GetClientUsingUserId(long userId);
+        //bool RemoveClient(string clientId);
+        Client GetClientUsingUserId(string userId);
         List<Client> GetClientsUsingLawyerId(string userName);
-        ServiceResponse<bool> BulkDeleteClient(List<long> ids);
+        Task<bool> RemoveClientData(string clientId);
+        ServiceResponse<bool> BulkDeleteClient(List<Guid> ids);
     }
 }

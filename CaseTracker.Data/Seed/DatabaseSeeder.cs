@@ -11,12 +11,12 @@ namespace CaseTracker.Data.Seed
 {
     public static class DatabaseSeeder
     {
-        public static void SeedData(IServiceProvider serviceProvider)
+        public static async Task SeedData(IServiceProvider serviceProvider)
         {
             using (var scope = serviceProvider.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
-                context.Database.Migrate(); // Ensure the database is updated
+                await context.Database.MigrateAsync(); // Ensure the database is updated
 
                 if (!context.SubscriptionPackages.Any()) // Prevent duplicate seeding
                 {
@@ -28,7 +28,8 @@ namespace CaseTracker.Data.Seed
                         new SubscriptionPackage { Name = "9Month", DurationDays = 270, IsTrial = false, PackagePrice = 400, CreatedDate = DateTime.UtcNow },
                         new SubscriptionPackage { Name = "12Month", DurationDays = 365, IsTrial = false, PackagePrice = 500, CreatedDate = DateTime.UtcNow }
                     );
-                    context.SaveChanges();
+
+                    await context.SaveChangesAsync();
                 }
             }
         }

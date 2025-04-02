@@ -57,10 +57,10 @@
     private List<SubscriptionPackage> nonTrialPackages;
     [Parameter] public long userId { get; set; }
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
-    private int _selectedPackageId;
+    private string _selectedPackageId;
     private int selectedPackagePrice;
 
-    private int selectedPackageId
+    private string selectedPackageId
     {
         get => _selectedPackageId;
         set
@@ -69,7 +69,7 @@
 
             // Update price dynamically when the selected package changes
             selectedPackagePrice = nonTrialPackages
-                .FirstOrDefault(p => p.Id == _selectedPackageId)?.PackagePrice ?? 0;
+                .FirstOrDefault(p => p.Id == Guid.Parse(_selectedPackageId))?.PackagePrice ?? 0;
         }
     }
 
@@ -96,11 +96,11 @@
     private void UpdatePackagePrice(ChangeEventArgs e)
     {
         // Parse selected package ID
-        selectedPackageId = int.Parse(e.Value.ToString());
+        selectedPackageId =  e.Value.ToString();
 
         // Fetch price of the selected package
         selectedPackagePrice = nonTrialPackages
-            .FirstOrDefault(p => p.Id == selectedPackageId)?.PackagePrice ?? 0;
+            .FirstOrDefault(p => p.Id == Guid.Parse(selectedPackageId))?.PackagePrice ?? 0;
     }
 
     private async Task InitialPayment()
@@ -111,7 +111,7 @@
             return;
         }
 
-        if (selectedPackageId == 0)
+        if (string.IsNullOrEmpty(selectedPackageId) || selectedPackageId == Guid.Empty.ToString())
         {
             NotificationService.Notify(NotificationSeverity.Error, "Error", "Please select a package before subscribing.");
             return;
@@ -126,7 +126,7 @@
         try
         {
             // Create a Razorpay order using the selected package price
-            var orderId = await SubscriptionService.CreateRazorpayOrderAsync(selectedPackagePrice, selectedPackageId, userId);
+            var orderId = await SubscriptionService.CreateRazorpayOrderAsync(selectedPackagePrice, Guid.Parse(selectedPackageId), userId);
 
             // Open Razorpay payment gateway
             await JSRuntime.InvokeVoidAsync("openRazorpay", orderId, selectedPackagePrice, userId);

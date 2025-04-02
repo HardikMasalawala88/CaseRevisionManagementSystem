@@ -15,16 +15,18 @@ namespace CaseTracker.Services
 {
     public class CaseService : ICaseService
     {
-        private readonly ICaseRepository _clientAndcaseRepository;
         private readonly ICaseDocumentRepository _caseDocumentRepository;
         private readonly ICaseRepository _caseRepository;
         private readonly IClientRepository _clientRepository;
         private readonly IUserRepository _userRepository;
         private readonly ApplicationContext _context;
 
-        public CaseService(ICaseRepository clientAndcaseRepository, ApplicationContext context, ICaseDocumentRepository caseDocumentRepository, ICaseRepository caseRepository, IClientRepository clientRepository, IUserRepository userRepository)
+        public CaseService(ApplicationContext context, 
+            ICaseDocumentRepository caseDocumentRepository, 
+            ICaseRepository caseRepository, 
+            IClientRepository clientRepository, 
+            IUserRepository userRepository)
         {
-            _clientAndcaseRepository = clientAndcaseRepository;
             _context = context;
             _caseDocumentRepository = caseDocumentRepository;
             _caseRepository = caseRepository;
@@ -50,7 +52,7 @@ namespace CaseTracker.Services
                     caseDetail.ModifiedDate = DateTime.UtcNow;
                     caseDetail.ModifiedBy = caseDetail.CreatedBy;
 
-                    _clientAndcaseRepository.UpdateCase(caseDetail);
+                    _caseRepository.UpdateCase(caseDetail);
                 }
                 else
                 {
@@ -66,7 +68,7 @@ namespace CaseTracker.Services
                     caseInfo.CaseParentId = caseFM.CaseParentId.Value;
                     caseInfo.CreatedBy = caseFM.Lawyer.CreatedBy;
 
-                    _clientAndcaseRepository.InsertCase(caseInfo);
+                    _caseRepository.InsertCase(caseInfo);
                     caseFM.Id = caseInfo.Id;
                 }
             }
@@ -83,9 +85,17 @@ namespace CaseTracker.Services
             try
             {
                 Paginate<Case> result = new Paginate<Case>();
+                //var caseList = await _caseRepository.GetCaseAsync(getCaseParameters);
+                //caseList.Data.ForEach(x => x.Client = _clientRepository.GetClient(Guid.Parse(x.ClientId)));
+                //caseList.Data.ForEach(x => x.Client.User = await _userRepository.GetUserByIdAsync(x.Client.UserId));
                 var caseList = await _caseRepository.GetCaseAsync(getCaseParameters);
-                caseList.Data.ForEach(x => x.Client = _clientRepository.GetClient(x.ClientId));
-                caseList.Data.ForEach(x => x.Client.User = _userRepository.GetUser(x.Client.UserId));
+
+                foreach (var caseItem in caseList.Data)
+                {
+                    caseItem.Client = _clientRepository.GetClient(Guid.Parse(caseItem.ClientId));
+                    caseItem.Client.User = await _userRepository.GetUserByIdAsync(caseItem.Client.UserId);
+                }
+
 
                 result.TotalCount = caseList.TotalCount;
                 result.Data = caseList.Data;
@@ -143,7 +153,7 @@ namespace CaseTracker.Services
             return caseInfo;
         }
         
-        public List<Case> ListClientCases(long clientId)
+        public List<Case> ListClientCases(string clientId)
         {
             var caseInfo = _context.Cases
                             .Where(c => !c.IsDelete && c.ClientId == clientId).ToList();
@@ -151,12 +161,12 @@ namespace CaseTracker.Services
             return caseInfo;
         }
 
-        public CaseFM GetCaseById(long caseId)
+        public CaseFM GetCaseById(Guid caseId)
         {
             CaseFM caseFM = new();
-            if (caseId > 0)
+            if (caseId != Guid.Empty)
             {
-                Case caseData = _clientAndcaseRepository.GetCase(caseId);
+                Case caseData = _caseRepository.GetCase(caseId);
 
                 caseFM.CaseTitle = caseData.CaseTitle;
                 caseFM.ClientId = caseData.ClientId;
@@ -172,12 +182,12 @@ namespace CaseTracker.Services
             return caseFM;
         }
 
-        public bool RemoveCaseDetail(long caseId)
+        public bool RemoveCaseDetail(Guid caseId)
         {
-            var caseData = _clientAndcaseRepository.GetCase(caseId);
+            var caseData = _caseRepository.GetCase(caseId);
             if (caseData != null)
             {
-                _clientAndcaseRepository.DeleteCase(caseId);
+                _caseRepository.DeleteCase(caseId);
                 return true;
             }
             else
@@ -186,7 +196,7 @@ namespace CaseTracker.Services
             }
         }
 
-        public ServiceResponse<bool> BulkDeleteCase(List<long> ids)
+        public ServiceResponse<bool> BulkDeleteCase(List<Guid> ids)
         {
             ServiceResponse<bool> response = new ServiceResponse<bool>();
             try

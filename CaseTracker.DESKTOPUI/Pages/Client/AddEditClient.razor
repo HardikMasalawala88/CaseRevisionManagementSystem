@@ -143,7 +143,7 @@
             clientFM.User.Role = "Client";
             clientFM.User.Username = clientFM.User.Email;
             clientFM.User.CreatedBy = user.Username;
-            if (clientFM.Id > 0)
+            if (clientFM.UserId != Guid.Empty.ToString())
             {
                 var userInfo = ClientService.UpdateClient(clientFM);
                 MudDialog.Close(DialogResult.Ok(true));

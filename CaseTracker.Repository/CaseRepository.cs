@@ -22,7 +22,7 @@ namespace CaseTracker.Repository
             _caseDocumentRepository = caseDocumentRepository;
         }
 
-        public void DeleteCase(long id)
+        public void DeleteCase(Guid id)
         {
             Case caseInfo = GetCase(id);
             caseInfo.IsDelete = true;
@@ -32,7 +32,7 @@ namespace CaseTracker.Repository
             _caseRepository.SaveChanges();
         }
 
-        public Case GetCase(long id)
+        public Case GetCase(Guid id)
         {
             return _caseRepository.GetById(id);
         }
@@ -104,7 +104,7 @@ namespace CaseTracker.Repository
             return result;
         }
 
-        public bool BulkDeleteCase(List<long> ids)
+        public bool BulkDeleteCase(List<Guid> ids)
         {
             var caseList = _caseRepository.GetAll().Where(x => ids.Contains(x.Id)).ToList();
 

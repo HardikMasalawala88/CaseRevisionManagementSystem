@@ -1,18 +1,19 @@
 ﻿using CaseTracker.Data.ContextModels;
+using CaseTracker.Data.Enum;
 using System;
 
 namespace CaseTracker.Data.FormModels
 {
     public class LawyerFM
     {
-        public long Id { get; set; }
-        public long UserId { get; set; }
-        public virtual User User { get; set; }
+        public Guid Id { get; set; }
         public DateTime? DateOfBirth { get; set; } 
         public string AadharNumber { get; set; }
         public string PanCardNumber { get; set; }
         public string VotingId { get; set; }
-        public string Lawyer_uniqueNumber { get; set; }
-        public Specialization Specialization { get; set; }
+        public string LawyerUniqueNumber { get; set; }
+        public string UserId { get; set; }
+        public virtual ApplicationUser User { get; set; }
+        public EnumLawyerSpecialization Specialization { get; set; }
     }
 }

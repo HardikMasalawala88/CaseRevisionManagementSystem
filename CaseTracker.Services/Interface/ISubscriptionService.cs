@@ -13,18 +13,18 @@ namespace CaseTracker.Services.Interface
     {
         Task<List<SubscriptionPackage>> GetNonTrialPackagesAsync();
         Task<SubscriptionPackage> GetTrialPackageAsync();
-        Task<UserSubscription> CreateTrialSubscriptionAsync(long userId, SubscriptionPackage selectedPackage);
-        Task<UserSubscription> GetUserActiveSubscriptionAsync(long userId);
-        Task<SubscriptionPackage> GetPackageByIdAsync(long packageId);
-        Task UpdateUserSubscriptionAsync(long userId, SubscriptionPackage selectedPackage);
-        bool HasSubscription(long userId);
-        UserSubscription GetUserSubscriptionById(long userId);
-        Task<string> CreateRazorpayOrderAsync(int amount, int subscriptionPackageId, long userId);
+        Task<UserSubscription> CreateTrialSubscriptionAsync(string userId, SubscriptionPackage selectedPackage);
+        Task<UserSubscription> GetUserActiveSubscriptionAsync(string userId);
+        Task<SubscriptionPackage> GetPackageByIdAsync(Guid packageId);
+        Task UpdateUserSubscriptionAsync(string userId, SubscriptionPackage selectedPackage);
+        bool HasSubscription(string userId);
+        UserSubscription GetUserSubscriptionById(string userId);
+        Task<string> CreateRazorpayOrderAsync(int amount, Guid subscriptionPackageId, string userId);
         Task AssignSubscription(UserSubscription subscription);
         Task SavePaymentAsync(Payment payment);
-        Task<List<Payment>> GetPaymentsByUserIdAsync(long userId);
+        Task<List<Payment>> GetPaymentsByUserIdAsync(string userId);
         Task<bool> VerifyPayment(VerifyPaymentRequest request);
         Task CloseSubscriptionDialog();
-        void RemoveSubscription(long subscriptionId);
+        void RemoveSubscription(Guid subscriptionId);
     }
 }

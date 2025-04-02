@@ -39,27 +39,27 @@
                             <MudItem xs="12" sm="6" md="4">
                                 <div class="form-group mb-3">
                                     <MudTextField ShrinkLabel @bind-Value="model.Name" Label="Name" Placeholder="Enter name" Variant="Variant.Outlined"
-                                                  Required="true" RequiredError="Name is required!" />
+                                    Required="true" RequiredError="Name is required!" />
                                 </div>
                                 <div class="form-group my-3">
                                     <MudTextField ShrinkLabel @bind-Value="model.Email" Label="Email" Variant="Variant.Outlined" Placeholder="Enter Email"
-                                                  Required="true" RequiredError="Email is required!" Validation="@(new EmailAddressAttribute() { ErrorMessage = "Invalid email address" })" />
+                                    Required="true" RequiredError="Email is required!" Validation="@(new EmailAddressAttribute() { ErrorMessage = "Invalid email address" })" />
                                 </div>
                                 <div class="form-group my-3">
                                     <MudTextField ShrinkLabel T="string" Variant="Variant.Outlined" @bind-Value="model.Password" Label="Password" InputType="InputType.Password"
-                                                  Placeholder="Enter Password" Required="true" RequiredError="Password is required!" />
+                                    Placeholder="Enter Password" Required="true" RequiredError="Password is required!" />
                                 </div>
                                 <div class="form-group my-3">
                                     <MudTextField ShrinkLabel Placeholder="Enter Mobile No" Required="true" RequiredError="Mobile no is required!" Immediate="true"
-                                                  @bind-Value="model.MobileNo" Mask="@(new PatternMask("(00) 0000-000-000"))" Label="Mobile No" Variant="Variant.Outlined" />
+                                    @bind-Value="model.MobileNo" Mask="@(new PatternMask("(00) 0000-000-000"))" Label="Mobile No" Variant="Variant.Outlined" />
                                 </div>
                                 <div class="form-group my-3">
-                                      <MudTextField ShrinkLabel @bind-Value="model.City" Label="City" Placeholder="Enter City" Variant="Variant.Outlined"
-                                                  Required="true" RequiredError="City is required!" />
+                                    <MudTextField ShrinkLabel @bind-Value="model.City" Label="City" Placeholder="Enter City" Variant="Variant.Outlined"
+                                    Required="true" RequiredError="City is required!" />
                                 </div>
                                 <div class="form-group my-3">
                                     <MudTextField ShrinkLabel T="string" @bind-Value="model.Address" Label="Address" Lines="3" Placeholder="Enter Address"
-                                                  Variant="Variant.Outlined" Required="true" RequiredError="Address is required!" />
+                                    Variant="Variant.Outlined" Required="true" RequiredError="Address is required!" />
                                 </div>
                                 <div class="d-flex justify-content-start mb-3">
                                     <label style="align-content:center;" class="me-2">Gender: </label>
@@ -76,15 +76,15 @@
                             <MudItem xs="12" sm="6" md="4">
                                 <div class="form-group mb-3">
                                     <MudTextField ShrinkLabel T="string" @bind-Value="model.LawyerFM.AadharNumber" Mask="@(new PatternMask("0000 0000 0000"))" Label="Aadhar Card Number" Placeholder="Enter Aadhar Number"
-                                                  Variant="Variant.Outlined" Required="true" RequiredError="Aadhar Number is required!" />
+                                    Variant="Variant.Outlined" Required="true" RequiredError="Aadhar Number is required!" />
                                 </div>
                                 <div class="form-group mb-3">
                                     <MudTextField ShrinkLabel T="string" @bind-Value="model.LawyerFM.PanCardNumber" Mask="@(new PatternMask("AAAAA0000A"))" Label="PAN Card Number" Placeholder="Enter PAN Number"
-                                                  Variant="Variant.Outlined" Required="true" RequiredError="PAN Number is required!" />
+                                    Variant="Variant.Outlined" Required="true" RequiredError="PAN Number is required!" />
                                 </div>
                                 <div class="form-group mb-3">
-                                    <MudSelect T="string" ShrinkLabel @bind-Value="@specialization" Label="Specialization" Variant="Variant.Outlined"
-                                               Required="true" RequiredError="Specialization is required!" Style="text-align:left;">
+                                    <MudSelect T="EnumLawyerSpecialization" ShrinkLabel @bind-Value="@model.Specialization" Label="Specialization" Variant="Variant.Outlined"
+                                    Required="true" RequiredError="Specialization is required!" Style="text-align:left;">
                                         <MudSelectItem T="string">Select Specialization</MudSelectItem>
                                         @foreach (var item in specializations)
                                         {
@@ -93,16 +93,16 @@
                                     </MudSelect>
                                 </div>
                                 <div class="form-group mb-3">
-                                    <MudTextField ShrinkLabel T="string" @bind-Value="model.LawyerFM.Lawyer_uniqueNumber" Label="Licence Number" Placeholder="Enter Licence Number"
-                                                  Variant="Variant.Outlined" Required="true" RequiredError="Licence Number is required!" />
+                                    <MudTextField ShrinkLabel T="string" @bind-Value="model.LawyerFM.LawyerUniqueNumber" Label="Licence Number" Placeholder="Enter Licence Number"
+                                    Variant="Variant.Outlined" Required="true" RequiredError="Licence Number is required!" />
                                 </div>
                                 <div class="form-group mb-3">
                                     <MudTextField ShrinkLabel T="string" @bind-Value="model.LawyerFM.VotingId" Label="Voting ID" Placeholder="Enter Voting ID"
-                                                  Variant="Variant.Outlined" Required="true" RequiredError="Voting ID is required!" />
+                                    Variant="Variant.Outlined" Required="true" RequiredError="Voting ID is required!" />
                                 </div>
                                 <div class="form-group mb-3">
                                     <MudDatePicker @bind-Date="model.LawyerFM.DateOfBirth" Label="Date of Birth" Placeholder="Enter Date of Birth"
-                                                   Variant="Variant.Outlined" Required="true" RequiredError="Date of Birth is required!" />
+                                    Variant="Variant.Outlined" Required="true" RequiredError="Date of Birth is required!" />
                                 </div>
                             </MudItem>
                         </MudGrid>
@@ -137,9 +137,9 @@
 
 
 @code {
-    private User user = new User();
+    private ApplicationUser user = new ApplicationUser();
     private RegisterFM model = new RegisterFM();
-    private LawyerFM lawyerData = new LawyerFM();
+    private Lawyer lawyerData = new Lawyer();
     private List<string> specializations = new List<string>();
     private string specialization = string.Empty;
     private bool loading = false;
@@ -155,11 +155,11 @@
         }
 
         model.LawyerFM = new LawyerFM();
-        specializations.Add(Specialization.Civil.ToString());
-        specializations.Add(Specialization.Criminal.ToString());
-        specializations.Add(Specialization.ConsumerProtectionAct.ToString());
-        specializations.Add(Specialization.Revenue.ToString());
-        specializations.Add(Specialization.LabourContractAct.ToString());
+        specializations.Add(EnumLawyerSpecialization.Civil.ToString());
+        specializations.Add(EnumLawyerSpecialization.Criminal.ToString());
+        specializations.Add(EnumLawyerSpecialization.ConsumerProtectionAct.ToString());
+        specializations.Add(EnumLawyerSpecialization.Revenue.ToString());
+        specializations.Add(EnumLawyerSpecialization.LabourContractAct.ToString());
 
         await base.OnInitializedAsync();
     }
@@ -170,23 +170,19 @@
         try
         {
             model.Username = model.Email;
-            var userInfo = AccountService.Register(model);
-            model.LawyerFM.UserId = userInfo.Id;
-            model.LawyerFM.User = userInfo;
-            lawyerData = model.LawyerFM;
-            var lawyerInfo = LawyerService.CreateOrUpdateLawyer(lawyerData);
-
-            var freeTrialPackage = await SubscriptionService.GetTrialPackageAsync();            // Method to get Free Trial Package
+            var appUser = await AccountService.RegisterLawyerAsync(model);
+            var freeTrialPackage = await SubscriptionService.GetTrialPackageAsync(); // Method to get Free Trial Package
             if (freeTrialPackage != null)
             {
                 var subscription = new UserSubscription
                     {
-                        UserId = lawyerInfo.Id, // Assuming LawyerService returns the lawyer's ID
-                        PackageId = freeTrialPackage.Id,
+                        UserId = appUser.Id, // Assuming LawyerService returns the lawyer's ID
+                        SubscriptionPackageId = freeTrialPackage.Id,
                         StartDate = DateTime.UtcNow,
                         EndDate = DateTime.UtcNow.AddDays(freeTrialPackage.DurationDays),
                         IsActive = true
                     };
+
                 await SubscriptionService.AssignSubscription(subscription);
             }
 

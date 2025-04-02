@@ -16,18 +16,23 @@ namespace CaseTracker.Repository
         {
             _lawyerRepository = lawyerRepository;
         }
-        public void DeleteLawyer(long id)
+        public void DeleteLawyer(Guid id)
         {
             Lawyer lawyer = GetLawyer(id);
             lawyer.IsDelete = true;
             lawyer.ModifiedDate = DateTime.UtcNow;
             lawyer.ModifiedBy = lawyer.CreatedBy;
 
-           // _lawyerRepository.Remove(lawyer);
+            //_lawyerRepository.Remove(lawyer);
             _lawyerRepository.SaveChanges();
         }
 
-        public Lawyer GetLawyer(long id)
+        public Task<bool> IsExistAsync(Guid id)
+        {
+            return _lawyerRepository.IsExistAsync(id);
+        }
+
+        public Lawyer GetLawyer(Guid id)
         {
             return _lawyerRepository.GetById(id);
         }

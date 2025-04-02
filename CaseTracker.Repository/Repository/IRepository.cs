@@ -10,8 +10,9 @@ namespace CaseTracker.Repository.Repository
     public interface IRepository<T> where T : BaseEntity
     {
         IEnumerable<T> GetAll();
-        T GetById(long id);
-        User GetByUsername(string userName);
+        T GetById(Guid id);
+        Task<bool> IsExistAsync(Guid id);
+        //ApplicationUser GetByUsername(string userName);
         T Insert(T entity);
         void Update(T entity);
         void Delete(T entity);

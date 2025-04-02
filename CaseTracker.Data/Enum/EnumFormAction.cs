@@ -1,6 +1,6 @@
 ﻿namespace CaseTracker.Data.Enum
 {
-    public enum FormAction
+    public enum EnumFormAction
     {
         Add,
         Edit,

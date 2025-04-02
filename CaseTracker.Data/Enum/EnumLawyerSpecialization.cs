@@ -1,6 +1,6 @@
-﻿namespace CaseTracker.Data.ContextModels
+﻿namespace CaseTracker.Data.Enum
 {
-    public enum Specialization
+    public enum EnumLawyerSpecialization
     {
         Revenue,
         Civil,

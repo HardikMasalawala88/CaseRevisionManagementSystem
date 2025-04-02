@@ -1,11 +1,12 @@
 ﻿using CaseTracker.Data.ContextModels;
+using System;
 
 namespace CaseTracker.Data.FormModels
 {
     public class CaseDocumentFM
     {
-        public long Id { get; set; }
-        public long CaseId { get; set; }
+        public Guid Id { get; set; }
+        public Guid CaseId { get; set; }
         public virtual Case? Case { get; set; }
         public string Url { get; set; }
         public string FileName { get; set; }

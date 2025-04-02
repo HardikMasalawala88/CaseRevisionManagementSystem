@@ -1,13 +1,14 @@
-﻿using System;
+﻿using CaseTracker.Data.ContextModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CaseTracker.Data.ContextModels
+namespace CaseTracker.Data.FormModels
 {
-    public class Payment : BaseEntityWithKey
-    { 
+    public class PaymentFM : BaseEntityFM
+    {
         public string OrderId { get; set; }
         public decimal Amount { get; set; }
         public string Status { get; set; }

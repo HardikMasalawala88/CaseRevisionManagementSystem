@@ -1,12 +1,14 @@
 ﻿using CaseTracker.Data.ContextModels;
 using CaseTracker.Data.FormModels;
+using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 
 namespace CaseTracker.Services.Interface
 {
     public interface IAccountService
     {
-        User Register(RegisterFM registerFM);
-        User Login(LoginFM loginFM);
+        Task<ApplicationUser> RegisterLawyerAsync(RegisterFM registerFM);
+        Task<ApplicationUser> RegisterAsync(RegisterFM registerFM);
+        Task<ApplicationUser> LoginAsync(LoginFM loginFM);
     }
 }

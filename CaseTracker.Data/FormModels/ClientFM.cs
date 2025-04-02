@@ -3,15 +3,15 @@ using System;
 
 namespace CaseTracker.Data.FormModels
 {
-    public class ClientFM
+    public class ClientFM : BaseEntityFM
     {
-        public long Id { get; set; }
-        public long UserId { get; set; }
-        public virtual User? User { get; set; }
+        public Guid Id { get; set; }
         public string? State { get; set; }
         public DateTime? DateOfBirth { get; set; } = DateTime.UtcNow;
         public string AadharNumber { get; set; }
         public string PanCardNumber { get; set; }
         public string VotingId { get; set; }
+        //public string UserId { get; set; }
+        public virtual ApplicationUser? User { get; set; }
     }
 }

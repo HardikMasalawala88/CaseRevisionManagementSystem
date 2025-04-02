@@ -10,11 +10,13 @@ namespace CaseTracker.Services.Interface
 {
     public interface ILawyerService
     {
-        LawyerFM CreateOrUpdateLawyer(LawyerFM lawyer);
+        //LawyerFM CreateOrUpdateLawyer(LawyerFM lawyer);
+        //Task<LawyerFM> CreateOrUpdateLawyer(LawyerFM lawyerFM);
         IEnumerable<Lawyer> ListLawyerData();
-        Lawyer GetLawyerData(long lawyerId);
-        Lawyer GetLawyerDataByUserId(long userId);
-        bool RemoveLawyerData(long lawyerId);
+        Lawyer InsertLawyer(Lawyer lawyer);
+        Lawyer GetLawyerData(string lawyerId);
+        Lawyer GetLawyerDataByUserId(string userId);
+        Task<bool> RemoveLawyerData(string lawyerId);
         List<Lawyer> GetLawyersWithUserDetails();
     }
 }

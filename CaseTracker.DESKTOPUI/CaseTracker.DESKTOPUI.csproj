@@ -22,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CaseTracker.API\CaseTracker.API.csproj" />
     <ProjectReference Include="..\CaseTracker.Data\CaseTracker.Data.csproj" />
     <ProjectReference Include="..\CaseTracker.Repository\CaseTracker.Repository.csproj" />
     <ProjectReference Include="..\CaseTracker.Services\CaseTracker.Services.csproj" />

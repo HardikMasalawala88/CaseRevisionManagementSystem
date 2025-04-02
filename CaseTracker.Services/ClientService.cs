@@ -3,8 +3,10 @@ using CaseTracker.Data.ContextModels;
 using CaseTracker.Data.FormModels;
 using CaseTracker.Data.ParameterModels;
 using CaseTracker.Data.ServiceResponse;
+using CaseTracker.Repository;
 using CaseTracker.Repository.Interface;
 using CaseTracker.Services.Interface;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -28,99 +30,107 @@ namespace CaseTracker.Services
             _mapper = mapper;
         }
 
-        public ClientFM CreateClient(ClientFM clientFM)
+        //public ClientFM CreateClient(ClientFM clientFM)
+        //{
+        //    try
+        //    {
+        //        User userData = new User();
+        //        userData.Name = clientFM.User.Name;
+        //        userData.Email = clientFM.User.Email;
+        //        userData.MobileNo = clientFM.User.MobileNo;
+        //        userData.Address = clientFM.User.Address;
+        //        userData.City = clientFM.User.City;
+        //        userData.Gender = clientFM.User.Gender;
+        //        userData.Role = clientFM.User.Role;
+        //        userData.Username = clientFM.User.Username;
+        //        userData.Password = clientFM.User.Password;
+        //        userData.CreatedBy = clientFM.User.CreatedBy;
+        //        _userRepository.InsertUser(userData);
+
+        //        Client client = new Client();
+        //        client.UserId = userData.Id;
+        //        client.DateOfBirth = clientFM.DateOfBirth;
+        //        client.AadharNumber = clientFM.AadharNumber;
+        //        client.State = clientFM.State;
+        //        client.PanCardNumber = clientFM.PanCardNumber;
+        //        client.VotingId = clientFM.VotingId;
+        //        client.User = userData;
+        //        client.CreatedBy = userData.CreatedBy;
+
+        //        _clientRepository.InsertClient(client);
+        //        clientFM.Id = client.Id;
+        //        clientFM.UserId = client.User.Id;
+
+        //        return clientFM;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return null;
+        //    }
+        //}
+
+        //public ClientFM UpdateClient(ClientFM clientFM)
+        //{
+        //    try
+        //    {
+        //        //ClientFM clientFM = new ClientFM();
+        //        var clientDetail = _context.Clients.FirstOrDefault(x => x.Id == clientFM.Id);
+        //        //var user = _context.UserData.FirstOrDefault(x => x.Id == clientDetail.UserId);
+        //        var userInfo = await _UserManager.FirstOrDefault(clientFM.User);
+
+        //        if (clientDetail is not null && user is not null)
+        //        {
+        //            _context.Entry(clientDetail).State = EntityState.Detached;
+
+        //            user.Name = clientFM.User.Name;
+        //            user.Email = clientFM.User.Email;
+        //            user.MobileNo = clientFM.User.MobileNo;
+        //            user.Address = clientFM.User.Address;
+        //            user.City = clientFM.User.City;
+        //            user.Gender = clientFM.User.Gender;
+        //            user.Role = clientFM.User.Role;
+        //            user.Username = clientFM.User.Username;
+        //            user.ModifiedBy = clientFM.User.ModifiedBy;
+        //            user.Password = clientFM.User.Password;
+        //            user.ModifiedDate = DateTime.UtcNow;
+
+        //            _userRepository.UpdateUser(user);
+
+        //            //Client client = clientDetail;
+        //            clientDetail.Id = clientFM.Id;
+        //            clientDetail.UserId = user.Id;
+        //            clientDetail.State = clientFM.State;
+        //            clientDetail.DateOfBirth = clientFM.DateOfBirth;
+        //            clientDetail.AadharNumber = clientDetail.AadharNumber;
+        //            clientDetail.PanCardNumber = clientFM.PanCardNumber;
+        //            clientDetail.VotingId = clientFM.VotingId;
+        //            clientDetail.ModifiedDate = DateTime.UtcNow;
+        //            clientDetail.ModifiedBy = user.ModifiedBy;
+
+        //            _clientRepository.UpdateClient(clientDetail);
+
+        //            clientFM = _mapper.Map<ClientFM>(clientDetail);
+        //        }
+
+        //        return clientFM;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return null;
+        //    }
+        //}
+
+        public Client InsertClient(Client client)
         {
-            try
-            {
-                User userData = new User();
-                userData.Name = clientFM.User.Name;
-                userData.Email = clientFM.User.Email;
-                userData.MobileNo = clientFM.User.MobileNo;
-                userData.Address = clientFM.User.Address;
-                userData.City = clientFM.User.City;
-                userData.Gender = clientFM.User.Gender;
-                userData.Role = clientFM.User.Role;
-                userData.Username = clientFM.User.Username;
-                userData.Password = clientFM.User.Password;
-                userData.CreatedBy = clientFM.User.CreatedBy;
-                _userRepository.InsertUser(userData);
+            var clientDetail = _clientRepository.InsertClient(client);
 
-                Client client = new Client();
-                client.UserId = userData.Id;
-                client.DateOfBirth = clientFM.DateOfBirth;
-                client.AadharNumber = clientFM.AadharNumber;
-                client.State = clientFM.State;
-                client.PanCardNumber = clientFM.PanCardNumber;
-                client.VotingId = clientFM.VotingId;
-                client.User = userData;
-                client.CreatedBy = userData.CreatedBy;
-
-                _clientRepository.InsertClient(client);
-                clientFM.Id = client.Id;
-                clientFM.UserId = client.User.Id;
-
-                return clientFM;
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
-        }
-        
-        public ClientFM UpdateClient(ClientFM clientFM)
-        {
-            try
-            {
-                //ClientFM clientFM = new ClientFM();
-                var clientDetail = _context.Clients.FirstOrDefault(x => x.Id == clientFM.Id);
-                var user = _context.UserData.FirstOrDefault(x => x.Id == clientDetail.UserId);
-                
-                if (clientDetail is not null && user is not null)
-                {
-                    _context.Entry(clientDetail).State = EntityState.Detached;
-
-                    user.Name = clientFM.User.Name;
-                    user.Email = clientFM.User.Email;
-                    user.MobileNo = clientFM.User.MobileNo;
-                    user.Address = clientFM.User.Address;
-                    user.City = clientFM.User.City;
-                    user.Gender = clientFM.User.Gender;
-                    user.Role = clientFM.User.Role;
-                    user.Username = clientFM.User.Username;
-                    user.ModifiedBy = clientFM.User.ModifiedBy;
-                    user.Password = clientFM.User.Password;
-                    user.ModifiedDate = DateTime.UtcNow;
-
-                    _userRepository.UpdateUser(user);
-
-                    //Client client = clientDetail;
-                    clientDetail.Id = clientFM.Id;
-                    clientDetail.UserId = user.Id;
-                    clientDetail.State = clientFM.State;
-                    clientDetail.DateOfBirth = clientFM.DateOfBirth;
-                    clientDetail.AadharNumber = clientDetail.AadharNumber;
-                    clientDetail.PanCardNumber = clientFM.PanCardNumber;
-                    clientDetail.VotingId = clientFM.VotingId;
-                    clientDetail.ModifiedDate = DateTime.UtcNow;
-                    clientDetail.ModifiedBy = user.ModifiedBy;
-
-                    _clientRepository.UpdateClient(clientDetail);
-
-                    clientFM = _mapper.Map<ClientFM>(clientDetail);
-                }
-
-                return clientFM;
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
+            return clientDetail;
         }
 
         public IEnumerable<Client> ListClientData()
         {
-            var clientInfo = _clientRepository.GetClients().Where(x => !x.IsDelete).ToList();
-            clientInfo.ForEach(x => x.User = _userRepository.GetUser(x.UserId));
+            var clientInfo = _clientRepository.GetClients().Where(x => x.IsDelete).ToList();
+
             return clientInfo;
         }
 
@@ -132,7 +142,10 @@ namespace CaseTracker.Services
             {
                 Paginate<Client> result = new Paginate<Client>();
                 var clients = await _clientRepository.GetClientsAsync(getClientsParameters);
-                clients.Data.ForEach(x => x.User = _userRepository.GetUser(x.UserId));
+                foreach (var client in clients.Data)
+                {
+                    client.User = await _userRepository.GetUserByIdAsync(client.UserId);
+                }
 
                 result.TotalCount = clients.TotalCount;
                 result.Data = clients.Data;
@@ -146,30 +159,29 @@ namespace CaseTracker.Services
             return response;
         }
 
-        public Client GetClientData(long clientId)
+        public Client GetClientData(string clientId)
         {
-            var clientDetail = _clientRepository.GetClient(clientId);
+            var clientDetail = _clientRepository.GetClient(Guid.Parse(clientId));
             return clientDetail;
         }
 
-        public ClientFM GetClientById(long clientId)
+        public ClientFM GetClientById(string clientId)
         {
             ClientFM clientFM = new();
-            Client clientData = _context.Clients.Include(x => x.User).FirstOrDefault(x => x.Id == clientId);
+            Client clientData = _context.Clients.Include(x => x.User).FirstOrDefault(x => x.UserId == clientId);
 
-            clientFM.UserId = clientData.UserId;
-            clientFM.AadharNumber = clientData.AadharNumber;
-            clientFM.PanCardNumber = clientData.PanCardNumber;
-            clientFM.VotingId = clientData.VotingId;
+            clientFM.Id = Guid.Parse(clientData.UserId);
+            clientFM.AadharNumber = clientData.User.AadharNumber;
+            clientFM.PanCardNumber = clientData.User.PAN;
+            clientFM.VotingId = clientData.User.VotingId;
             clientFM.User = clientData.User;
-            clientFM.State = clientData.State;
-            clientFM.DateOfBirth = clientData.DateOfBirth;
-            clientFM.Id = clientData.Id;
+            clientFM.State = clientData.User.State;
+            clientFM.DateOfBirth = clientData.User.DateOfBirth;
 
             return clientFM;
         }
 
-        public Client GetClientUsingUserId(long userId)
+        public Client GetClientUsingUserId(string userId)
         {
             var clientDetail = _context.Clients.FirstOrDefault(x => x.UserId == userId);
             return clientDetail;
@@ -189,15 +201,16 @@ namespace CaseTracker.Services
             return clientDetail;
         }
 
-        public bool RemoveClient(long clientId)
+        async Task<bool> IClientService.RemoveClientData(string clientId)
         {
-            var clientData = _clientRepository.GetClient(clientId);
-            clientData.User = _userRepository.GetUser(clientData.UserId);
+            //var clientData = _clientRepository.GetClient(Guid.Parse(clientId));
+            var isExist = await _clientRepository.IsExistAsync(Guid.Parse(clientId));
+            //clientData.User = await _userRepository.GetUserByIdAsync(clientData.UserId);
             
-            if (clientData != null)
+            if (isExist)
             {
-                _clientRepository.DeleteClient(clientId);
-                _userRepository.DeleteUser(clientData.User.Id);
+                _clientRepository.DeleteClient(Guid.Parse(clientId));
+                //await _userRepository.DeleteUserAsync(clientData.User.Id);
 
                 return true;
             }
@@ -207,7 +220,7 @@ namespace CaseTracker.Services
             }
         }
 
-        public ServiceResponse<bool> BulkDeleteClient(List<long> ids)
+        public ServiceResponse<bool> BulkDeleteClient(List<Guid> ids)
         {
             ServiceResponse<bool> response = new ServiceResponse<bool>();
             try

@@ -52,7 +52,7 @@ namespace CaseTracker.Services
         }
 
 
-        public async Task<UserSubscription> CreateTrialSubscriptionAsync(long userId, SubscriptionPackage selectedPackage)
+        public async Task<UserSubscription> CreateTrialSubscriptionAsync(string userId, SubscriptionPackage selectedPackage)
         {
             var trialPackage = await GetTrialPackageAsync();
             if (trialPackage == null) throw new Exception("Trial package not found");
@@ -60,7 +60,7 @@ namespace CaseTracker.Services
             var subscription = new UserSubscription
             {
                 UserId = userId,
-                PackageId = trialPackage.Id,
+                SubscriptionPackageId = trialPackage.Id,
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddDays(selectedPackage.DurationDays),
                 IsActive = true
@@ -72,7 +72,7 @@ namespace CaseTracker.Services
             return subscription;
         }
 
-        public async Task<UserSubscription> GetUserActiveSubscriptionAsync(long userId)
+        public async Task<UserSubscription> GetUserActiveSubscriptionAsync(string userId)
         {
             return await _context.UserSubscriptions
                                  .Where(s => s.UserId == userId && s.IsActive && s.EndDate >= DateTime.Now)
@@ -80,16 +80,21 @@ namespace CaseTracker.Services
                                  .FirstOrDefaultAsync();
         }
 
-        public async Task<SubscriptionPackage> GetPackageByIdAsync(long packageId)
+        public async Task<SubscriptionPackage> GetPackageByIdAsync(Guid packageId)
         {
             return await _context.SubscriptionPackages
                                  .FirstOrDefaultAsync(p => p.Id == packageId);
         }
 
-        public async Task UpdateUserSubscriptionAsync(long userId, SubscriptionPackage selectedPackage)
+        public async Task UpdateUserSubscriptionAsync(string userId, SubscriptionPackage selectedPackage)
         {
-            var user = _context.UserData.Any(x => x.Id == userId);
-            if (!_context.UserData.Any(x => x.Id == userId)) {
+            var user = await _userService.GetUserByIdAsync(userId);
+            //var user = _context.UserData.Any(x => x.Id == userId);
+            //if (!_context.UserData.Any(x => x.Id == userId)) {
+            //    throw new Exception("User not found");
+            //}
+            if (user is null)
+            {
                 throw new Exception("User not found");
             }
 
@@ -103,7 +108,7 @@ namespace CaseTracker.Services
             var newSubscription = new UserSubscription
             {
                 UserId = userId,
-                PackageId = selectedPackage.Id,
+                SubscriptionPackageId = selectedPackage.Id,
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now.AddDays(selectedPackage.DurationDays),
                 IsActive = true
@@ -113,17 +118,17 @@ namespace CaseTracker.Services
             await _context.SaveChangesAsync();
         }
 
-        public bool HasSubscription(long userId)
+        public bool HasSubscription(string userId)
         {
             return _context.UserSubscriptions.Any(i => i.UserId == userId);
         }
 
-        public UserSubscription GetUserSubscriptionById(long userId)
+        public UserSubscription GetUserSubscriptionById(string userId)
         {
             return _context.UserSubscriptions.FirstOrDefault(i => i.UserId == userId);
         }
 
-        public async Task<string> CreateRazorpayOrderAsync(int amount, int subscriptionPackageId, long userId)
+        public async Task<string> CreateRazorpayOrderAsync(int amount, Guid subscriptionPackageId, string userId)
         {
             try
             {
@@ -197,7 +202,7 @@ namespace CaseTracker.Services
             }
         }
 
-        public async Task<List<Payment>> GetPaymentsByUserIdAsync(long userId)
+        public async Task<List<Payment>> GetPaymentsByUserIdAsync(string userId)
         {
             try
             {
@@ -251,7 +256,7 @@ namespace CaseTracker.Services
             Console.WriteLine("Closing the subscription dialog...");
         }
 
-        public void RemoveSubscription(long subscriptionId)
+        public void RemoveSubscription(Guid subscriptionId)
         {
             var subscription = _context.UserSubscriptions.Find(subscriptionId);
             if (subscription != null)

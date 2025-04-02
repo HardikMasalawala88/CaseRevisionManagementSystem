@@ -1,5 +1,5 @@
 using AutoMapper;
-using CaseTracker.API;
+//using CaseTracker.API;
 using CaseTracker.Data.ContextModels;
 using CaseTracker.Data.FormModels;
 using CaseTracker.DESKTOPUI.CustomAuthentication;
@@ -15,11 +15,14 @@ using MudBlazor.Services;
 using MudBlazor;
 using Radzen;
 using Blazored.Toast;
+using CaseTracker.Data.Seed;
+using CaseTracker.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var startup = new Startup(builder.Configuration);
-startup.ConfigureServices(builder.Services);
+//Configured from API project
+//var startup = new Startup(builder.Configuration);
+//startup.ConfigureServices(builder.Services);
 
 //builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("PaymentSettings"));
 
@@ -64,13 +67,21 @@ builder.Services.AddTransient<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddHttpClient();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 //Initialize the mapper
 var config = new MapperConfiguration(cfg =>
-        cfg.CreateMap<RegisterFM, User>()
+        cfg.CreateMap<RegisterFM, Lawyer>()
     );
 
 var app = builder.Build();
+
+// Seed roles
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await DatabaseSeeder.SeedData(services);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
