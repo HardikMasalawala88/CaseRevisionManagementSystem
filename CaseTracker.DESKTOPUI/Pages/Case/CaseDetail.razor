@@ -9,9 +9,9 @@
 @inject ICaseService CaseService
 @inject IClientService ClientService
 @inject ILawyerService LawyerService
+@inject IUserRepository UserRepository
 @inject NavigationManager NavigationManager
 @inject ProtectedSessionStorage Session
-@inject IUserRepository UserRepository
 
 
 <MudPaper Class="pa-4">
@@ -52,38 +52,37 @@
     private IMudDialogInstance MudDialog { get; set; }
 
     [Parameter]
-    public long CaseId { get; set; }
+    public Guid CaseId { get; set; }
 
     [Parameter]
-    public FormAction FormAction { get; set; }
+    public EnumFormAction FormAction { get; set; }
 
     ProtectedBrowserStorageResult<string> userName = new ProtectedBrowserStorageResult<string>();
     private CaseFM caseData = new CaseFM();
     private string selectedClient = string.Empty;
     private string selectedCaseParentId = string.Empty;
-    private User userData = new User();
     private List<CaseDocument> caseDocuments = new List<CaseDocument>();
     private List<Case> cases;
     private Lawyer lawyerData = new Lawyer();
-
     protected override async Task OnInitializedAsync()
     {
         cases = CaseService.ListCaseDetail();
 
-        if (CaseId > 0)
+        if (CaseId != Guid.Empty)
         {
             caseData = CaseService.GetCaseById(CaseId);
             var caseInfo = cases.FirstOrDefault(c => c.Id == caseData.CaseParentId);
-            if (caseData is not null && caseData.Id > 0)
+            if (caseData is not null && caseData.Id != Guid.Empty)
             {
-                    selectedClient = ClientService.GetClientById(caseData.ClientId).User.Email;
-                    selectedCaseParentId = caseInfo != null ? caseInfo.CaseNumber : string.Empty;
+                selectedClient = ClientService.GetClientById(caseData.ClientId).User.Email;
+                selectedCaseParentId = caseInfo != null ? caseInfo.CaseNumber : string.Empty;
             }
 
             caseDocuments = CaseService.ListCaseDocDetail();
         }
 
         lawyerData = LawyerService.GetLawyerData(caseData.LawyerId);
+        await base.OnInitializedAsync();
     }
 
     private void CloseDialog() => MudDialog.Close();

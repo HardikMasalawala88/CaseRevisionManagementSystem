@@ -90,8 +90,8 @@ namespace CaseTracker.Repository
             result.Data = data.Skip(skip).Take(param.PageSize).Select(caseData => new Case
             {
                 Id = caseData.Id,
-                CaseTitle = caseData.CaseTitle,
-                CaseDetail = caseData.CaseDetail,
+                Title = caseData.Title,
+                Description = caseData.Description,
                 ClientId = caseData.ClientId,
                 HearingDate = caseData.HearingDate,
                 LawyerId = caseData.LawyerId,

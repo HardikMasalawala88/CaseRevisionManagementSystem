@@ -3,7 +3,6 @@ using AutoMapper;
 using CaseTracker.Data.ContextModels;
 using CaseTracker.Data.FormModels;
 using CaseTracker.DESKTOPUI.CustomAuthentication;
-using CaseTracker.DESKTOPUI.Data;
 using CaseTracker.Repository.Interface;
 using CaseTracker.Repository.Repository;
 using CaseTracker.Repository;
@@ -29,7 +28,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddSingleton<TitleService>();
 builder.Services.AddScoped<MudBlazor.DialogService>();
 builder.Services.AddScoped<Radzen.DialogService>();

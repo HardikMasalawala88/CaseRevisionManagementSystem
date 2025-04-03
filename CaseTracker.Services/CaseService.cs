@@ -44,8 +44,8 @@ namespace CaseTracker.Services
                     caseDetail.ClientId = caseFM.ClientId;
                     caseDetail.LawyerId = caseFM.LawyerId;
                     caseDetail.HearingDate = caseFM.HearingDate;
-                    caseDetail.CaseTitle = caseFM.CaseTitle;
-                    caseDetail.CaseDetail = caseFM.CaseDetail;
+                    caseDetail.Title = caseFM.CaseTitle;
+                    caseDetail.Description = caseFM.CaseDetail;
                     caseDetail.CourtLocation = caseFM.CourtLocation;
                     caseDetail.CaseParentId = caseFM.CaseParentId.Value;
                     caseDetail.CaseNumber = caseFM.CaseNumber;
@@ -60,8 +60,8 @@ namespace CaseTracker.Services
                     caseInfo.ClientId = caseFM.ClientId;
                     caseInfo.LawyerId = caseFM.LawyerId;
                     caseInfo.HearingDate = caseFM.HearingDate;
-                    caseInfo.CaseTitle = caseFM.CaseTitle;
-                    caseInfo.CaseDetail = caseFM.CaseDetail;
+                    caseInfo.Title = caseFM.CaseTitle;
+                    caseInfo.Description = caseFM.CaseDetail;
                     caseInfo.CourtLocation = caseFM.CourtLocation;
                     caseInfo.CaseNumber = caseFM.CaseNumber;
                     //caseInfo.CaseParentId = caseFM.CaseParentId.HasValue ? caseFM.CaseParentId.Value : 0;
@@ -168,9 +168,9 @@ namespace CaseTracker.Services
             {
                 Case caseData = _caseRepository.GetCase(caseId);
 
-                caseFM.CaseTitle = caseData.CaseTitle;
+                caseFM.CaseTitle = caseData.Title;
                 caseFM.ClientId = caseData.ClientId;
-                caseFM.CaseDetail = caseData.CaseDetail;
+                caseFM.CaseDetail = caseData.Description;
                 caseFM.CourtLocation = caseData.CourtLocation;
                 caseFM.HearingDate = caseData.HearingDate;
                 caseFM.CaseNumber = caseData.CaseNumber;

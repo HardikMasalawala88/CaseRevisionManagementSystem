@@ -28,15 +28,15 @@ namespace CaseTracker.Data.ContextModels
         [MaxLength(10)]
         public string PAN { get; set; } = string.Empty;
 
-        public string State { get; set; }
         public string VotingId { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        public string Country { get; set; } = "INDIA";
+
         public DateTime? CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedDate { get; set; }
 
-        [MaxLength(450)]
         public string? CreatedBy { get; set; }
-
-        [MaxLength(450)]
         public string? UpdatedBy { get; set; }
 
         public string Name => $"{Firstname} {Lastname}".Trim();

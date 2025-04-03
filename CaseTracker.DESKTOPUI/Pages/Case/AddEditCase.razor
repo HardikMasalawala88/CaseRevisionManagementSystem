@@ -139,7 +139,7 @@
                 var currentCase = cases.FirstOrDefault(c => c.Id == CaseId);
                 @if(currentCase != null)
                 {
-                    var filteredCases = cases.Where(c => c.CaseTitle != currentCase.CaseTitle).ToList();
+                    var filteredCases = cases.Where(c => c.Title != currentCase.CaseTitle).ToList();
                     <div class="parent-caselist">
                         <h4>Parent Case Details</h4>
                         <table class="table">
@@ -157,7 +157,7 @@
                                 {
                                     <tr>
                                         <td>@caseItem.Id</td>
-                                        <td>@caseItem.CaseTitle</td>
+                                        <td>@caseItem.Title</td>
                                         <td>@caseItem.HearingDate.ToShortDateString()</td>
                                         <td>@caseItem.CaseNumber</td>
                                         <td><MudButton Variant="Variant.Text" Color="Color.Primary" 
@@ -224,7 +224,7 @@
     public long CaseId { get; set; }
 
     [Parameter]
-    public FormAction FormAction { get; set; }
+    public EnumFormAction FormAction { get; set; }
 
     [Parameter]
     public DateTime HearingDate { get; set; }

@@ -1,0 +1,1 @@
+for /d /r "C:\CRMS" %%d in (bin obj) do @if exist "%%d" rd /s /q "%%d"
